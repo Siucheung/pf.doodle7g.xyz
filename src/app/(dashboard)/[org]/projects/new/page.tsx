@@ -3,7 +3,6 @@
 import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {useRouter} from 'next/navigation'
-import {createClient} from '@/lib/supabase/client'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {Label} from '@/components/ui/label'
@@ -18,7 +17,6 @@ export default function NewProjectPage({
   params: { org: string }
 }) {
   const router = useRouter()
-  const supabase = createClient()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [repositoryUrl, setRepositoryUrl] = useState('')
@@ -30,62 +28,34 @@ export default function NewProjectPage({
     setLoading(true)
 
     try {
-      const {data: {user}} = await supabase.auth.getUser()
-      if (!user) {
-        toast.error(t('mustBeLoggedIn', {default: 'You must be logged in'}))
-        router.push('/login')
-        return
-      }
-
-      const {data: org} = await supabase
-        .from('organizations')
-        .select('id')
-        .eq('slug', params.org)
-        .single()
-
-      if (!org) {
-        toast.error(t('orgNotFound', {default: 'Organization not found'}))
-        return
-      }
-
-      // Get user's org membership
-      const {data: member} = await supabase
-        .from('organization_members')
-        .select('role')
-        .eq('organization_id', org.id)
-        .eq('user_id', user.id)
-        .single()
-
-      if (!member || !['owner', 'admin'].includes(member.role)) {
-        toast.error(t('noPermission', {default: 'You do not have permission to create projects'}))
-        return
-      }
-
-      // Generate slug from name
-      const slug = name
-        .toLowerCase()
-        .replace(/[^a-z0-9-]+/g, '-')
-        .replace(/^-|-$/g, '')
-
-      const {data: project, error} = await supabase
-        .from('projects')
-        .insert({
-          organization_id: org.id,
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           name,
-          slug,
           description: description || null,
-          repository_url: repositoryUrl || null,
-        })
-        .select()
-        .single()
+          repositoryUrl: repositoryUrl || null,
+          orgSlug: params.org,
+        }),
+      })
 
-      if (error) {
-        toast.error(error.message)
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast.error(data.error || 'Failed to create project')
         return
       }
 
       toast.success(t('projectCreated', {default: 'Project created!'}))
-      router.push(`/${params.org}/projects/${project.slug}`)
+
+      // If Infisical provisioning failed, surface a warning to admin users
+      if (data.warning) {
+        toast.warning(data.warning)
+      }
+
+      router.push(`/${params.org}/projects/${data.project.slug}`)
     } catch {
       toast.error(t('unexpectedError', {default: 'An unexpected error occurred'}))
     } finally {

@@ -186,6 +186,9 @@ export default async function ProjectPage({
                 </Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="secrets">
+              Secrets
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -478,6 +481,25 @@ export default async function ProjectPage({
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Secrets Tab */}
+          <TabsContent value="secrets">
+            <Card>
+              <CardHeader>
+                <CardTitle>Secrets</CardTitle>
+                <CardDescription>
+                  Manage environment variables and secrets for this project
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center py-12">
+                  <Button onClick={() => window.location.href = `/${org}/projects/${project.slug}/secrets`}>
+                    View All Secrets
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

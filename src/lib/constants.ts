@@ -79,6 +79,8 @@ export const SIDEBAR_ITEMS = [
   { titleKey: 'monitors', href: 'monitors', icon: 'Activity' },
   { titleKey: 'logs', href: 'logs', icon: 'ScrollText' },
   { titleKey: 'incidents', href: 'incidents', icon: 'AlertTriangle' },
+  // 注意："密钥"是项目级页面（/{org}/projects/{project}/secrets），
+  // 不属于组织级侧栏导航。通过项目详情页的 Tab 访问。
   { titleKey: 'team', href: 'team', icon: 'Users' },
   { titleKey: 'settings', href: 'settings', icon: 'Settings' },
 ] as const

@@ -93,3 +93,17 @@ export interface OrganizationMember {
   invited_at: string
   profile?: Profile
 }
+
+export interface InfisicalCredential {
+  id: string
+  project_id: string
+  organization_id: string
+  infisical_project_id: string
+  infisical_environment: string
+  machine_identity_client_id: string
+  machine_identity_client_secret_encrypted: string
+  encryption_key_id: string
+  infisical_url: string
+  created_at: string
+  updated_at: string
+}

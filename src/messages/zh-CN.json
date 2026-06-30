@@ -10,6 +10,7 @@
     "monitors": "监控",
     "logs": "日志",
     "incidents": "工单",
+    "secrets": "密钥",
     "team": "团队",
     "settings": "设置",
     "organizations": "组织",
@@ -154,6 +155,25 @@
     "comment": "评论",
     "assignment": "分配",
     "triggered": "触发"
+  },
+  "secrets": {
+    "title": "密钥",
+    "description": "管理项目的环境变量和密钥",
+    "notConfigured": "Infisical 未配置",
+    "notConfiguredDesc": "连接 Infisical 以管理此项目的密钥",
+    "noSecrets": "还没有密钥",
+    "noSecretsDesc": "添加你的第一个密钥以开始使用",
+    "addSecret": "添加密钥",
+    "key": "键名",
+    "value": "值",
+    "type": "类型",
+    "environment": "环境",
+    "folder": "文件夹",
+    "shared": "共享",
+    "personal": "个人",
+    "copy": "复制",
+    "delete": "删除",
+    "viewAllSecrets": "查看所有密钥"
   },
   "team": {
     "title": "团队",

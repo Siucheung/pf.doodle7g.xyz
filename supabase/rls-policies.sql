@@ -138,3 +138,12 @@ CREATE POLICY "members_read_events" ON public.incident_events
 -- ===== Webhooks =====
 CREATE POLICY "admins_manage_webhooks" ON public.webhooks
   FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
+
+-- ===== Infisical 凭据 =====
+-- 此表存储加密密钥，仅允许服务端访问。
+-- RLS 阻止所有客户端查询；仅通过 SUPABASE_SERVICE_ROLE_KEY 绕过 RLS 访问。
+ALTER TABLE public.infisical_credentials ENABLE ROW LEVEL SECURITY;
+
+-- 不开放任何客户端策略：infisical_credentials 仅限服务端。
+-- 所有访问通过 API 层使用 SUPABASE_SERVICE_ROLE_KEY 完成，
+-- 该密钥完全绕过 RLS，确保安全隔离。

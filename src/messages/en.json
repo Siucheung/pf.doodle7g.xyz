@@ -10,6 +10,7 @@
     "monitors": "Monitors",
     "logs": "Logs",
     "incidents": "Incidents",
+    "secrets": "Secrets",
     "team": "Team",
     "settings": "Settings",
     "organizations": "Organizations",
@@ -149,6 +150,25 @@
     "comment": "Comment",
     "assignment": "Assignment",
     "triggered": "Triggered"
+  },
+  "secrets": {
+    "title": "Secrets",
+    "description": "Manage environment variables and secrets for your projects",
+    "notConfigured": "Infisical not configured",
+    "notConfiguredDesc": "Connect Infisical to manage secrets for this project",
+    "noSecrets": "No secrets yet",
+    "noSecretsDesc": "Add your first secret to get started",
+    "addSecret": "Add Secret",
+    "key": "Key",
+    "value": "Value",
+    "type": "Type",
+    "environment": "Environment",
+    "folder": "Folder",
+    "shared": "Shared",
+    "personal": "Personal",
+    "copy": "Copy",
+    "delete": "Delete",
+    "viewAllSecrets": "View All Secrets"
   },
   "team": {
     "title": "Team",
