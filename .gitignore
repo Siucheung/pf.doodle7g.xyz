@@ -29,6 +29,10 @@ logs
 *.log
 npm-debug.log*
 
+# Exception: 不忽略源代码中的 logs 路由
+!src/app/api/logs/**
+!src/app/(dashboard)/**/logs/**
+
 # Testing
 coverage/
 
