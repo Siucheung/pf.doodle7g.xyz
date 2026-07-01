@@ -80,6 +80,7 @@ export interface Incident {
   project_id: string
   organization_id: string
   monitor_id: string | null
+  resolved_at: string | null
   created_at: string
   project?: { name: string; slug: string }
   monitor?: { name: string }
@@ -91,6 +92,7 @@ export interface IncidentEvent {
   event_type: string
   old_value: string | null
   new_value: string | null
+  actor_id: string | null
   created_at: string
   actor?: { full_name: string }
 }

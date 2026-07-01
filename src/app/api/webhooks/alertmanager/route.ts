@@ -51,6 +51,78 @@ function verifySignature(payload: string, signature: string | null): boolean {
   }
 }
 
+interface IdResult {
+  id: string
+}
+
+/**
+ * 从告警 labels 中推断 project_id
+ * 优先级: labels.project / labels.project_slug → 按 slug 查找
+ *          labels.repository / labels.repo → 按 repository_url 查找
+ */
+async function findProjectId(
+  supabase: ReturnType<typeof createClient<any>>,
+  orgId: string,
+  labels: Record<string, string>,
+): Promise<string | null> {
+  const slug = labels.project || labels.project_slug
+  if (slug) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('slug', slug)
+      .eq('organization_id', orgId)
+      .maybeSingle() as { data: IdResult | null }
+    if (project) {
+      console.log('[Alertmanager] Matched project by slug:', project.id)
+      return project.id
+    }
+  }
+
+  const repoUrl = labels.repository || labels.repo
+  if (repoUrl) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('repository_url', repoUrl)
+      .eq('organization_id', orgId)
+      .maybeSingle() as { data: IdResult | null }
+    if (project) {
+      console.log('[Alertmanager] Matched project by repository_url:', project.id)
+      return project.id
+    }
+  }
+
+  return null
+}
+
+/**
+ * 从告警 labels 中推断 monitor_id
+ * 优先级: labels.monitor / labels.monitor_name / labels.job → 按 name 查找
+ */
+async function findMonitorId(
+  supabase: ReturnType<typeof createClient<any>>,
+  orgId: string,
+  labels: Record<string, string>,
+): Promise<string | null> {
+  const name = labels.monitor || labels.monitor_name || labels.job
+  if (!name) return null
+
+  const { data: monitor } = await supabase
+    .from('monitors')
+    .select('id')
+    .ilike('name', name)
+    .eq('organization_id', orgId)
+    .maybeSingle() as { data: IdResult | null }
+
+  if (monitor) {
+    console.log('[Alertmanager] Matched monitor:', monitor.id)
+    return monitor.id
+  }
+
+  return null
+}
+
 export async function POST(request: Request) {
   try {
     // 读取 org 参数（从 URL 查询参数）
@@ -172,6 +244,8 @@ export async function POST(request: Request) {
           incidentId = openIncidents[0].id
         } else if (alert.status === 'firing') {
           // 创建新工单
+          const projectId = await findProjectId(supabase, organizationId, alert.labels)
+          const monitorId = await findMonitorId(supabase, organizationId, alert.labels)
           const { data: newIncident, error: incidentErr } = await supabase
             .from('incidents')
             .insert({
@@ -180,6 +254,8 @@ export async function POST(request: Request) {
               description: description || `Alertmanager 告警: ${title}`,
               severity,
               status: 'open',
+              project_id: projectId,
+              monitor_id: monitorId,
             })
             .select('id')
             .single()

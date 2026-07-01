@@ -4,31 +4,41 @@ import {DashboardHeader} from '@/components/dashboard/Header'
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
-import {Plus, AlertTriangle} from 'lucide-react'
+import {Input} from '@/components/ui/input'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'
+import {Plus, AlertTriangle, Search} from 'lucide-react'
 import Link from 'next/link'
 import {formatDistanceToNow} from 'date-fns'
-import {INCIDENT_SEVERITIES, INCIDENT_STATUSES} from '@/lib/constants'
 import {getTranslations} from 'next-intl/server'
 import type {Incident} from '@/lib/db-types'
+import { IncidentSeverityBadge, IncidentStatusBadge } from '@/components/dashboard/incident-badges'
 
-async function getIncidents(orgId: string) {
+async function getIncidents(orgId: string, status?: string, severity?: string, search?: string) {
   const supabase = await createClient()
 
-  const {data} = await supabase
+  let query = supabase
     .from('incidents')
-    .select('*, project:projects(name, slug)')
+    .select('*, projects!inner(name, slug), monitors(name)')
     .eq('organization_id', orgId)
     .order('created_at', {ascending: false })
 
+  if (status) query = query.eq('status', status)
+  if (severity) query = query.eq('severity', severity)
+  if (search) query = query.ilike('title', `%${search}%`)
+
+  const {data} = await query
   return data || []
 }
 
 export default async function IncidentsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ org: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const {org} = await params
+  const sp = await searchParams
   const supabase = await createClient()
   const t = await getTranslations('incidents')
 
@@ -42,7 +52,10 @@ export default async function IncidentsPage({
     redirect('/login')
   }
 
-  const incidents = await getIncidents(orgData.id)
+  const status = typeof sp.status === 'string' ? sp.status : ''
+  const severity = typeof sp.severity === 'string' ? sp.severity : ''
+  const search = typeof sp.search === 'string' ? sp.search : ''
+  const incidents = await getIncidents(orgData.id, status, severity, search)
 
   const activeIncidents = incidents.filter(
     (i) => i.status === 'open' || i.status === 'acknowledged'
@@ -69,6 +82,46 @@ export default async function IncidentsPage({
             {t('createIncident')}
           </Button>
         </div>
+
+        <form method="GET" className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              name="search"
+              placeholder={t('searchLogs', {default: '搜索...'})}
+              className="pl-8"
+              defaultValue={search}
+            />
+          </div>
+          <Select name="status" defaultValue={status}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder={t('status', {default: '状态'})} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{t('status', {default: '全部状态'})}</SelectItem>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="acknowledged">Acknowledged</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+              <SelectItem value="muted">Muted</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select name="severity" defaultValue={severity}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder={t('severity', {default: '严重程度'})} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">{t('severity', {default: '全部级别'})}</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+              <SelectItem value="warning">Warning</SelectItem>
+              <SelectItem value="info">Info</SelectItem>
+            </SelectContent>
+          </Select>
+          {(status || severity || search) && (
+            <Link href={`/${org}/incidents`} className="text-sm text-muted-foreground hover:text-foreground">
+              清除筛选
+            </Link>
+          )}
+        </form>
 
         {activeIncidents.length > 0 && (
           <div className="space-y-4">
@@ -166,31 +219,4 @@ export default async function IncidentsPage({
   )
 }
 
-function IncidentSeverityBadge({severity}: {severity: string}) {
-  const variants: Record<string, 'default' | 'destructive' | 'secondary'> = {
-    critical: 'destructive',
-    warning: 'default',
-    info: 'secondary',
-  }
 
-  return (
-    <Badge variant={variants[severity] || 'secondary'}>
-      {INCIDENT_SEVERITIES[severity as keyof typeof INCIDENT_SEVERITIES] || severity}
-    </Badge>
-  )
-}
-
-function IncidentStatusBadge({status}: {status: string}) {
-  const variants: Record<string, 'default' | 'destructive' | 'secondary' | 'outline'> = {
-    open: 'destructive',
-    acknowledged: 'default',
-    resolved: 'secondary',
-    muted: 'outline',
-  }
-
-  return (
-    <Badge variant={variants[status] || 'outline'}>
-      {INCIDENT_STATUSES[status as keyof typeof INCIDENT_STATUSES] || status}
-    </Badge>
-  )
-}

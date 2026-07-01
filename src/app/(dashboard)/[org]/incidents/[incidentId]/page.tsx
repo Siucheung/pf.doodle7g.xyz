@@ -3,14 +3,18 @@ import {redirect} from 'next/navigation'
 import {DashboardHeader} from '@/components/dashboard/Header'
 import {ArrowLeft} from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card'
-import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
 import {Separator} from '@/components/ui/separator'
 import Link from 'next/link'
 import {formatDistanceToNow} from 'date-fns'
-import {INCIDENT_SEVERITIES, INCIDENT_STATUSES} from '@/lib/constants'
 import {getTranslations} from 'next-intl/server'
 import type {IncidentEvent} from '@/lib/db-types'
+import {
+  IncidentSeverityBadge,
+  IncidentStatusBadge,
+  EventTypeBadge,
+} from '@/components/dashboard/incident-badges'
+import { IncidentActions } from '@/components/dashboard/incident-actions'
 
 async function getIncident(orgSlug: string, incidentId: string) {
   const supabase = await createClient()
@@ -95,14 +99,7 @@ export default async function IncidentDetailPage({
             </div>
           </div>
 
-          <div className="flex gap-2">
-            {incident.status === 'open' && (
-              <Button>{t('acknowledge')}</Button>
-            )}
-            {incident.status !== 'resolved' && (
-              <Button variant="outline">{t('resolve')}</Button>
-            )}
-          </div>
+          <IncidentActions incidentId={incident.id} org={org} status={incident.status} />
         </div>
 
         <Separator />
@@ -156,46 +153,4 @@ export default async function IncidentDetailPage({
   )
 }
 
-function IncidentSeverityBadge({severity}: {severity: string}) {
-  const variants: Record<string, 'default' | 'destructive' | 'secondary'> = {
-    critical: 'destructive',
-    warning: 'default',
-    info: 'secondary',
-  }
 
-  return (
-    <Badge variant={variants[severity] || 'secondary'}>
-      {INCIDENT_SEVERITIES[severity as keyof typeof INCIDENT_SEVERITIES] || severity}
-    </Badge>
-  )
-}
-
-function IncidentStatusBadge({status}: {status: string}) {
-  const variants: Record<string, 'default' | 'destructive' | 'secondary' | 'outline'> = {
-    open: 'destructive',
-    acknowledged: 'default',
-    resolved: 'secondary',
-    muted: 'outline',
-  }
-
-  return (
-    <Badge variant={variants[status] || 'outline'}>
-      {INCIDENT_STATUSES[status as keyof typeof INCIDENT_STATUSES] || status}
-    </Badge>
-  )
-}
-
-function EventTypeBadge({eventType, t}: {eventType: string; t: (key: string) => string}) {
-  const labels: Record<string, string> = {
-    status_change: t('statusChanged'),
-    comment: t('comment'),
-    assignment: t('assignment'),
-    trigger: t('triggered'),
-  }
-
-  return (
-    <Badge variant="outline" className="text-xs">
-      {labels[eventType] || eventType}
-    </Badge>
-  )
-}
