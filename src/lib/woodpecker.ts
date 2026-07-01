@@ -79,6 +79,27 @@ export interface WoodpeckerStep {
   type: string
 }
 
+/** Woodpecker 工作流步骤（含 ID） */
+export interface WoodpeckerWorkflowStep {
+  id: number
+  name: string
+  state: string
+  exit_code: number
+  started: number
+  finished: number
+}
+
+/** Woodpecker 工作流 */
+export interface WoodpeckerWorkflow {
+  name: string
+  steps: WoodpeckerWorkflowStep[]
+}
+
+/** Woodpecker 流水线详情（含工作流和步骤） */
+export interface WoodpeckerPipelineDetail extends WoodpeckerPipeline {
+  workflows?: WoodpeckerWorkflow[]
+}
+
 /** Woodpecker 日志行 */
 export interface WoodpeckerLogLine {
   time: number
@@ -264,12 +285,17 @@ export class WoodpeckerClient {
     })
   }
 
+  /** 获取流水线详情（含工作流和步骤 ID） */
+  async getPipelineDetail(repoId: number, pipelineNumber: number): Promise<WoodpeckerPipelineDetail> {
+    return this.request<WoodpeckerPipelineDetail>(
+      `/repos/${repoId}/pipelines/${pipelineNumber}`
+    )
+  }
+
   /** 获取流水线步骤列表 */
-  async listSteps(repoId: number, pipelineNumber: number): Promise<WoodpeckerStep[]> {
-    const pipeline = await this.getPipeline(repoId, pipelineNumber)
-    // 步骤信息通过流水线详情的 workflows 获取
-    // 这里返回一个虚拟数组，实际步骤在 webhook 中
-    return []
+  async listSteps(repoId: number, pipelineNumber: number): Promise<WoodpeckerWorkflowStep[]> {
+    const detail = await this.getPipelineDetail(repoId, pipelineNumber)
+    return (detail.workflows || []).flatMap((wf) => wf.steps || [])
   }
 
   /** 获取步骤日志 */

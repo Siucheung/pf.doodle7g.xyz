@@ -135,13 +135,24 @@
     "interval": "Interval",
     "active": "Active",
     "paused": "Paused",
-    "project": "Project"
+    "project": "Project",
+    "responseTime": "Response Time",
+    "uptime": "Uptime",
+    "noData": "No data",
+    "lastChecks": "Recent Checks"
   },
   "logs": {
     "title": "Logs",
     "description": "Browse and search log entries across all projects",
     "noLogs": "No logs yet",
-    "logsDesc": "Log entries will appear here as your applications generate output"
+    "logsDesc": "Log entries will appear here as your applications generate output",
+    "logStream": "Log Stream",
+    "pause": "Pause",
+    "resume": "Resume",
+    "searchLogs": "Search logs...",
+    "allLevels": "All Levels",
+    "allSources": "All Sources",
+    "scrollToBottom": "Scroll to bottom"
   },
   "audit": {
     "title": "Audit Log",

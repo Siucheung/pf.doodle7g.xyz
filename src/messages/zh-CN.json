@@ -140,13 +140,24 @@
     "active": "活跃",
     "paused": "暂停",
     "project": "项目",
-    "created": "创建于"
+    "created": "创建于",
+    "responseTime": "响应时间",
+    "uptime": "可用率",
+    "noData": "暂无数据",
+    "lastChecks": "最近检查"
   },
   "logs": {
     "title": "日志",
     "description": "浏览和搜索所有项目的日志",
     "noLogs": "还没有日志",
-    "logsDesc": "应用生成输出后，日志将显示在这里"
+    "logsDesc": "应用生成输出后，日志将显示在这里",
+    "logStream": "日志流",
+    "pause": "暂停",
+    "resume": "继续",
+    "searchLogs": "搜索日志...",
+    "allLevels": "全部级别",
+    "allSources": "全部来源",
+    "scrollToBottom": "滚动到底部"
   },
   "audit": {
     "title": "审计日志",

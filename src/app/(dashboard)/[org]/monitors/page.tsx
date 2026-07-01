@@ -9,6 +9,7 @@ import Link from 'next/link'
 import {formatDistanceToNow} from 'date-fns'
 import {getTranslations} from 'next-intl/server'
 import type {Monitor} from '@/lib/db-types'
+import {MonitorSparkline} from '@/components/dashboard/monitor-sparkline'
 
 async function getMonitors(orgId: string) {
   const supabase = await createClient()
@@ -153,6 +154,8 @@ export default async function MonitorsPage({
                   <div className="text-xs text-muted-foreground">
                     {t('created', {default: 'Created'})} {formatDistanceToNow(new Date(monitor.created_at), {addSuffix: true})}
                   </div>
+                  {/* Mini sparkline chart */}
+                  <MonitorSparkline monitorId={monitor.id} />
                 </CardContent>
               </Card>
             ))}

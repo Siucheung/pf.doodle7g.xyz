@@ -20,6 +20,7 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { DEPLOYMENT_STATUSES, PROJECT_STATUSES, CI_PIPELINE_STATUSES } from '@/lib/constants'
 import { DeleteProjectButton } from './delete-button'
+import { PipelineList } from '@/components/dashboard/pipeline-list'
 import { cn } from '@/lib/utils'
 import type { Deployment, Monitor, LogEntry, Incident, CiPipeline } from '@/lib/db-types'
 
@@ -550,72 +551,7 @@ export default async function ProjectPage({
                     description={t('noPipelinesDesc')}
                   />
                 ) : (
-                  <div className="space-y-3">
-                    {ciPipelines.map((pipeline: CiPipeline) => (
-                      <div
-                        key={pipeline.id}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium truncate">
-                              #{pipeline.pipeline_number}{' '}
-                              {pipeline.commit_message || pipeline.branch || t('deployment')}
-                            </p>
-                            <Badge
-                              variant={
-                                pipeline.status === 'success'
-                                  ? 'default'
-                                  : pipeline.status === 'failure' || pipeline.status === 'error'
-                                  ? 'destructive'
-                                  : pipeline.status === 'running'
-                                  ? 'secondary'
-                                  : 'outline'
-                              }
-                            >
-                              {CI_PIPELINE_STATUSES[pipeline.status as keyof typeof CI_PIPELINE_STATUSES] || pipeline.status}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            {pipeline.event && (
-                              <span className="capitalize">{pipeline.event}</span>
-                            )}
-                            {pipeline.branch && (
-                              <span>{pipeline.branch}</span>
-                            )}
-                            {pipeline.commit_sha && (
-                              <span className="font-mono">{pipeline.commit_sha.slice(0, 7)}</span>
-                            )}
-                            <span>
-                              {formatDistanceToNow(new Date(pipeline.created_at), { addSuffix: true })}
-                            </span>
-                            {pipeline.duration_ms && (
-                              <span>{(pipeline.duration_ms / 1000).toFixed(1)}s</span>
-                            )}
-                          </div>
-                          {pipeline.steps && pipeline.steps.length > 0 && (
-                            <div className="flex items-center gap-2 mt-2">
-                              {(pipeline.steps as Array<{ name: string; status: string }>).map((step, i) => (
-                                <Badge
-                                  key={i}
-                                  variant={
-                                    step.status === 'success'
-                                      ? 'default'
-                                      : step.status === 'failure' || step.status === 'error'
-                                      ? 'destructive'
-                                      : 'outline'
-                                  }
-                                  className="text-[10px] px-2 py-0"
-                                >
-                                  {step.name.split('/').pop()}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <PipelineList pipelines={ciPipelines as CiPipeline[]} />
                 )}
               </CardContent>
             </Card>
