@@ -9,6 +9,7 @@
     "deployments": "Deployments",
     "monitors": "Monitors",
     "logs": "Logs",
+    "audit": "Audit",
     "incidents": "Incidents",
     "alerts": "Alerts",
     "secrets": "Secrets",
@@ -16,7 +17,8 @@
     "team": "Team",
     "settings": "Settings",
     "organizations": "Organizations",
-    "selectOrg": "Select organization"
+    "selectOrg": "Select organization",
+    "resume": "My Resume"
   },
   "auth": {
     "signIn": "Sign In",
@@ -125,6 +127,9 @@
     "addMonitor": "Add Monitor",
     "noMonitors": "No monitors configured",
     "monitorsDesc": "Create monitors to track uptime and response times of your endpoints",
+    "gotoGatus": "Gatus Health Dashboard",
+    "gatusDesc": "Infrastructure dependency health overview (PostgreSQL, Apprise, Alertmanager, etc.)",
+    "openGatus": "Open Dashboard",
     "method": "Method",
     "expectedStatus": "Expected Status",
     "interval": "Interval",
@@ -137,6 +142,28 @@
     "description": "Browse and search log entries across all projects",
     "noLogs": "No logs yet",
     "logsDesc": "Log entries will appear here as your applications generate output"
+  },
+  "audit": {
+    "title": "Audit Log",
+    "description": "View data change history on key business tables",
+    "noLogs": "No audit logs yet",
+    "noLogsDesc": "When projects, incidents, notification channels, or other key data changes, the record will appear here",
+    "tableName": "Table",
+    "operation": "Operation",
+    "recordId": "Record ID",
+    "changedBy": "Changed By",
+    "changedAt": "Changed At",
+    "oldValue": "Old Value",
+    "newValue": "New Value",
+    "allTables": "All Tables",
+    "searchRecord": "Search record ID...",
+    "INSERT": "Created",
+    "UPDATE": "Updated",
+    "DELETE": "Deleted",
+    "projects": "Projects",
+    "incidents": "Incidents",
+    "notification_channels": "Notification Channels",
+    "credentials": "Credentials"
   },
   "incidents": {
     "title": "Incidents",
@@ -271,6 +298,13 @@
     "dangerDesc": "Irreversible and destructive actions",
     "deleteOrg": "Delete organization",
     "deleteOrgDesc": "Permanently delete this organization and all its data",
+    "deleteOrgConfirm": "Delete Organization",
+    "deleteOrgConfirmDesc": "This action cannot be undone. This will permanently delete {name} and all its associated data (projects, deployments, monitors, incidents, etc.).",
+    "deleteOrgTypeConfirm": "Type {name} to confirm:",
+    "confirmDelete": "Confirm Delete",
+    "deleting": "Deleting...",
+    "deleteSuccess": "Organization deleted",
+    "cancel": "Cancel",
     "delete": "Delete"
   },
   "common": {

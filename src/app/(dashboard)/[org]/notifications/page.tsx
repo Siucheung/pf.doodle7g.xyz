@@ -89,9 +89,8 @@ export default function NotificationsPage() {
     }
   }, [orgSlug, t])
 
-  useEffect(() => {
-    fetchChannels()
-  }, [fetchChannels])
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { fetchChannels() }, [fetchChannels])
 
   const openCreateDialog = () => {
     setEditingChannel(null)

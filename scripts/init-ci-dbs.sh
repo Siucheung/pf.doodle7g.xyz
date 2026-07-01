@@ -8,6 +8,7 @@ set -e
 # 密码可通过环境变量覆盖（默认仅供本地开发）
 GITEA_PASSWORD="${GITEA_DB_PASSWORD:-gitea}"
 WOODPECKER_PASSWORD="${WOODPECKER_DB_PASSWORD:-woodpecker}"
+GATUS_PASSWORD="${GATUS_DB_PASSWORD:-gatus}"
 
 # 利用 psql 连接到默认的 postgres 数据库执行
 psql -U "$POSTGRES_USER" -d postgres <<-EOSQL
@@ -16,6 +17,8 @@ psql -U "$POSTGRES_USER" -d postgres <<-EOSQL
     WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'gitea')\gexec
     SELECT 'CREATE DATABASE woodpecker'
     WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'woodpecker')\gexec
+    SELECT 'CREATE DATABASE gatus'
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'gatus')\gexec
 
     -- 创建用户（幂等）
     DO \$\$
@@ -25,6 +28,9 @@ psql -U "$POSTGRES_USER" -d postgres <<-EOSQL
         END IF;
         IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'woodpecker') THEN
             CREATE USER woodpecker WITH PASSWORD '$WOODPECKER_PASSWORD';
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'gatus') THEN
+            CREATE USER gatus WITH PASSWORD '$GATUS_PASSWORD';
         END IF;
     END
     \$\$;
@@ -40,4 +46,10 @@ EOSQL
 psql -U "$POSTGRES_USER" -d woodpecker <<-EOSQL
     GRANT ALL ON SCHEMA public TO woodpecker;
     GRANT ALL PRIVILEGES ON DATABASE woodpecker TO woodpecker;
+EOSQL
+
+# 切换到 gatus 库授予 schema 权限
+psql -U "$POSTGRES_USER" -d gatus <<-EOSQL
+    GRANT ALL ON SCHEMA public TO gatus;
+    GRANT ALL PRIVILEGES ON DATABASE gatus TO gatus;
 EOSQL

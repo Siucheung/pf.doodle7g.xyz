@@ -1,0 +1,87 @@
+# ============================================================
+# OpsPilot — Caddy 反向代理配置
+# 用于本地开发环境统一端口访问
+# ============================================================
+# 安装 /etc/hosts 条目后可使用 subdomain 访问：
+#   127.0.0.1 opspilot.localhost
+#   127.0.0.1 gatus.localhost
+#   127.0.0.1 apprise.localhost
+#   127.0.0.1 alertmanager.localhost
+#   127.0.0.1 woodpecker.localhost
+#   127.0.0.1 gitea.localhost
+#   127.0.0.1 minio.localhost
+# ============================================================
+
+# 全局设置
+{
+  # 本地开发使用自签名证书
+  # 生产环境替换为真实域名即可自动获取 Let's Encrypt 证书
+  local_certs
+
+  # 管理 API（仅监听 localhost）
+  admin 127.0.0.1:2019
+
+  # 安全头片段
+  headers {
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "SAMEORIGIN"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    -Server
+  }
+}
+
+# ============================================================
+# OpsPilot 主应用（Next.js）
+# ============================================================
+opspilot.localhost {
+  reverse_proxy host.docker.internal:3000
+
+  log {
+    output file /data/logs/opspilot.log {
+      roll_size 10mb
+      roll_keep 5
+    }
+  }
+}
+
+# ============================================================
+# Gatus 服务健康看板
+# ============================================================
+gatus.localhost {
+  reverse_proxy gatus:8080
+}
+
+# ============================================================
+# Apprise 通知网关
+# ============================================================
+apprise.localhost {
+  reverse_proxy apprise:8000
+}
+
+# ============================================================
+# Alertmanager 告警管理
+# ============================================================
+alertmanager.localhost {
+  reverse_proxy alertmanager:9093
+}
+
+# ============================================================
+# Woodpecker CI
+# ============================================================
+woodpecker.localhost {
+  reverse_proxy woodpecker-server:8000
+}
+
+# ============================================================
+# Gitea 代码仓库
+# ============================================================
+gitea.localhost {
+  reverse_proxy gitea:3000
+}
+
+# ============================================================
+# MinIO 控制台
+# ============================================================
+minio.localhost {
+  reverse_proxy minio:9001
+}

@@ -1,0 +1,25 @@
+# ============================================================
+# WAL-G Backup Sidecar
+# PostgreSQL 备份与恢复工具，支持增量备份和 PITR
+# ============================================================
+# 基础镜像：Alpine Linux + WAL-G
+FROM alpine:3.20
+
+RUN apk add --no-cache \
+    postgresql16-client \
+    wal-g \
+    bash \
+    curl \
+    tzdata
+
+# 创建 WAL-G 数据目录
+RUN mkdir -p /backups /scripts
+
+# 复制备份/恢复脚本
+COPY scripts/wal-g/backup.sh /scripts/backup.sh
+COPY scripts/wal-g/entrypoint.sh /scripts/entrypoint.sh
+RUN chmod +x /scripts/*.sh
+
+WORKDIR /scripts
+
+ENTRYPOINT ["/scripts/entrypoint.sh"]

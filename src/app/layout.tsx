@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { IntlProvider } from "@/i18n/providers";
+import { PerformancePatch } from "@/components/performance-patch";
 import { getMessages, getLocale } from "next-intl/server";
 import "./globals.css";
 
@@ -39,6 +40,7 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} min-h-full flex flex-col antialiased`}>
         <IntlProvider locale={locale} messages={messages}>
           <TooltipProvider>
+            <PerformancePatch />
             {children}
             <Toaster />
           </TooltipProvider>

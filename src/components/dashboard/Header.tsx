@@ -4,7 +4,7 @@ import {useTranslations} from 'next-intl'
 import {useState} from 'react'
 import {usePathname} from 'next/navigation'
 import Link from 'next/link'
-import {Menu, Search, Bell} from 'lucide-react'
+import {Menu, Search, Bell, Building2, User, Settings, LogOut} from 'lucide-react'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
 import {
@@ -158,31 +158,72 @@ export function DashboardHeader({ user, memberships }: DashboardHeaderProps) {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-64">
+            {/* 用户信息头部 */}
+            <div className="flex items-center gap-3 px-4 py-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.avatar_url || undefined} />
+                <AvatarFallback>
+                  {(user.full_name || user.email)
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm font-medium truncate">{user.full_name || t('unknown')}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+              </div>
+            </div>
+
+            {/* 组织信息 */}
+            {memberships.length > 0 && (
+              <div className="px-4 pb-2">
+                <div className="flex flex-wrap gap-1">
+                  {memberships.slice(0, 2).map((m) => (
+                    <span
+                      key={m.organization_id}
+                      className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
+                    >
+                      <Building2 className="h-3 w-3" />
+                      {m.organization.name}
+                    </span>
+                  ))}
+                  {memberships.length > 2 && (
+                    <span className="text-xs text-muted-foreground">+{memberships.length - 2}</span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
-              <DropdownMenuLabel>
-                <p className="text-sm font-medium">{user.full_name || t('unknown')}</p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link href="/dashboard/settings/profile">{t('profile')}</Link>
+              <DropdownMenuItem className="cursor-pointer">
+                <Link href="/settings/profile" className="flex w-full items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {t('profile')}
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/dashboard/settings">{tNav('settings')}</Link>
+              <DropdownMenuItem className="cursor-pointer">
+                <Link href="/settings" className="flex w-full items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  {tNav('settings')}
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <form action="/auth/signout" method="post">
-                <DropdownMenuItem>
-                  <button
-                    type="submit"
-                    className="w-full text-destructive"
-                  >
-                    {t('signOut')}
-                  </button>
-                </DropdownMenuItem>
-              </form>
             </DropdownMenuGroup>
+
+            <DropdownMenuSeparator />
+            <form action="/auth/signout" method="post">
+              <DropdownMenuItem className="cursor-pointer">
+                <button type="submit" className="flex w-full items-center gap-2 text-destructive">
+                  <LogOut className="h-4 w-4" />
+                  {t('signOut')}
+                </button>
+              </DropdownMenuItem>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

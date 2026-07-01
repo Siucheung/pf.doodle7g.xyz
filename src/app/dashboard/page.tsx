@@ -3,7 +3,7 @@ import {redirect} from 'next/navigation'
 import {getTranslations} from 'next-intl/server'
 import type {Organization} from '@/lib/db-types'
 
-async function slugify(name: string): string {
+function slugify(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, '-')
@@ -24,7 +24,7 @@ async function createDefaultOrgAction() {
   const baseSlug = await slugify(emailPrefix)
   const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`
 
-  const {error: rpcError} = await supabase.rpc('create_organization', {
+  const {error: rpcError} = await (supabase.rpc as any)('create_organization', {
     org_name: `${emailPrefix}'s Workspace`,
     org_slug: uniqueSlug,
     user_id: user.id,
@@ -33,7 +33,8 @@ async function createDefaultOrgAction() {
 
   if (rpcError) {
     console.error('Error creating default org:', rpcError)
-    return {success: false as const, error: rpcError.message || 'Failed to create workspace'}
+    console.error(rpcError.message || 'Failed to create workspace')
+    return
   }
 
   redirect(`/${uniqueSlug}`)
@@ -57,7 +58,7 @@ async function createOrgAction(formData: FormData) {
   let lastError: {message: string} | null = null
 
   for (const slug of slugsToTry) {
-    const {error: createError} = await supabase.rpc('create_organization', {
+    const {error: createError} = await (supabase.rpc as any)('create_organization', {
       org_name: name,
       org_slug: slug,
       user_id: user.id,
@@ -76,11 +77,11 @@ async function createOrgAction(formData: FormData) {
 
     // Other errors - fail immediately
     console.error('Error creating org:', createError)
-    return {success: false as const, error: createError.message || 'Failed to create organization'}
+    return
   }
 
   console.error('Error creating org:', lastError)
-  return {success: false as const, error: lastError?.message || 'This organization name is already taken. Please try another.'}
+  return
 }
 
 export default async function DashboardPage() {
@@ -122,7 +123,7 @@ export default async function DashboardPage() {
   )
 }
 
-function CreateOrgForm({userEmail, t, tCommon}: {userEmail: string; t: ReturnType<typeof getTranslations>; tCommon: ReturnType<typeof getTranslations>}) {
+function CreateOrgForm({userEmail, t, tCommon}: {userEmail: string; t: Awaited<ReturnType<typeof getTranslations>>; tCommon: Awaited<ReturnType<typeof getTranslations>>}) {
   return (
     <div className="space-y-4 rounded-lg border bg-card p-6">
       <form action={createOrgAction} className="space-y-4">
@@ -164,7 +165,7 @@ function CreateOrgForm({userEmail, t, tCommon}: {userEmail: string; t: ReturnTyp
           type="submit"
           className="inline-flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          {t('skipCreateOrg', {default: 'Skip for now'})}
+          {t('skipCreateOrg')}
         </button>
       </form>
 

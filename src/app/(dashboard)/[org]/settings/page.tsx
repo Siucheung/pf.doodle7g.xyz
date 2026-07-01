@@ -10,6 +10,7 @@ import {Building2, Shield, Globe} from 'lucide-react'
 import {notFound} from 'next/navigation'
 import {DEPLOYMENT_ENVIRONMENTS, PLANS} from '@/lib/constants'
 import {getTranslations} from 'next-intl/server'
+import {DeleteOrgDialog} from '@/components/settings/delete-org-dialog'
 
 async function getOrgData(orgSlug: string) {
   const supabase = await createClient()
@@ -150,7 +151,7 @@ export default async function SettingsPage({
                     {t('deleteOrgDesc')}
                   </p>
                 </div>
-                <Button variant="destructive">{t('delete')}</Button>
+                <DeleteOrgDialog orgSlug={orgData.slug} orgName={orgData.name} />
               </div>
             </CardContent>
           </Card>

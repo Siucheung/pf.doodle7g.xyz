@@ -9,6 +9,7 @@
     "deployments": "部署",
     "monitors": "监控",
     "logs": "日志",
+    "audit": "审计",
     "incidents": "工单",
     "alerts": "告警",
     "secrets": "密钥",
@@ -16,7 +17,8 @@
     "settings": "设置",
     "notifications": "通知",
     "organizations": "组织",
-    "selectOrg": "选择组织"
+    "selectOrg": "选择组织",
+    "resume": "我的履历"
   },
   "auth": {
     "signIn": "登录",
@@ -129,6 +131,9 @@
     "addMonitor": "添加监控",
     "noMonitors": "还没有监控",
     "monitorsDesc": "创建监控来跟踪端点的正常运行时间和响应时间",
+    "gotoGatus": "Gatus 健康看板",
+    "gatusDesc": "基础设施依赖服务健康状态一览（PostgreSQL、Redis、Apprise、Alertmanager 等）",
+    "openGatus": "打开看板",
     "method": "方法",
     "expectedStatus": "期望状态码",
     "interval": "间隔",
@@ -142,6 +147,28 @@
     "description": "浏览和搜索所有项目的日志",
     "noLogs": "还没有日志",
     "logsDesc": "应用生成输出后，日志将显示在这里"
+  },
+  "audit": {
+    "title": "审计日志",
+    "description": "查看关键业务表的数据变更记录",
+    "noLogs": "暂无审计记录",
+    "noLogsDesc": "当项目、工单、通知渠道等关键数据发生变更时，变更记录将显示在这里",
+    "tableName": "数据表",
+    "operation": "操作类型",
+    "recordId": "记录 ID",
+    "changedBy": "操作人",
+    "changedAt": "操作时间",
+    "oldValue": "旧值",
+    "newValue": "新值",
+    "allTables": "全部表",
+    "searchRecord": "搜索记录 ID...",
+    "INSERT": "创建",
+    "UPDATE": "修改",
+    "DELETE": "删除",
+    "projects": "项目",
+    "incidents": "工单",
+    "notification_channels": "通知渠道",
+    "credentials": "凭据"
   },
   "incidents": {
     "title": "工单",
@@ -276,6 +303,13 @@
     "dangerDesc": "不可逆的破坏性操作",
     "deleteOrg": "删除组织",
     "deleteOrgDesc": "永久删除此组织及其所有数据",
+    "deleteOrgConfirm": "删除组织",
+    "deleteOrgConfirmDesc": "此操作无法撤销。将永久删除 {name} 及其所有关联数据（项目、部署、监控、工单等）。",
+    "deleteOrgTypeConfirm": "请输入 {name} 以确认删除：",
+    "confirmDelete": "确认删除",
+    "deleting": "删除中...",
+    "deleteSuccess": "组织已删除",
+    "cancel": "取消",
     "delete": "删除"
   },
   "common": {

@@ -29,13 +29,4 @@ DROP TRIGGER IF EXISTS set_updated_at ON public.alertmanager_alerts;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.alertmanager_alerts
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 
--- RLS
-ALTER TABLE public.alertmanager_alerts ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "members_read_alertmanager_alerts" ON public.alertmanager_alerts;
-CREATE POLICY "members_read_alertmanager_alerts" ON public.alertmanager_alerts
-  FOR SELECT USING (organization_id IN (SELECT organization_id FROM public.user_orgs()));
-
-DROP POLICY IF EXISTS "admins_manage_alertmanager_alerts" ON public.alertmanager_alerts;
-CREATE POLICY "admins_manage_alertmanager_alerts" ON public.alertmanager_alerts
-  FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
+-- RLS 见 supabase/rls-policies.sql

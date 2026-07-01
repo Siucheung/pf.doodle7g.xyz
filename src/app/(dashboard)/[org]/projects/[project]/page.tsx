@@ -517,7 +517,7 @@ export default async function ProjectPage({
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-12">
-                  <Link href={`/${org}/projects/${project.slug}/secrets`}>
+                  <Link href={`/${org}/projects/${(project as any).slug}/secrets`}>
                     <Button>
                       {secT('viewAllSecrets')}
                     </Button>

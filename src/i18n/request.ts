@@ -5,7 +5,7 @@ import {locales, defaultLocale} from '@/i18n/routing'
 export default getRequestConfig(async ({requestLocale}: {requestLocale: Promise<string | undefined>}) => {
   const locale = (await requestLocale) ?? defaultLocale
 
-  if (!locales.includes(locale)) {
+  if (!(locales as readonly string[]).includes(locale)) {
     notFound()
   }
 

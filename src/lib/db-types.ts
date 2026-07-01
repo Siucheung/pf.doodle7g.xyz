@@ -22,7 +22,18 @@ export interface Project {
   repository_url: string | null
   created_at: string
   updated_at: string
-  project?: { name: string }
+}
+
+export interface AuditLog {
+  id: string
+  organization_id: string
+  table_name: string
+  operation: 'INSERT' | 'UPDATE' | 'DELETE'
+  record_id: string | null
+  changed_by: string | null
+  old_data: Record<string, unknown> | null
+  new_data: Record<string, unknown> | null
+  created_at: string
 }
 
 export interface Deployment {

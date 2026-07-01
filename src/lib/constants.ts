@@ -78,6 +78,7 @@ export const SIDEBAR_ITEMS = [
   { titleKey: 'deployments', href: 'deployments', icon: 'Rocket' },
   { titleKey: 'monitors', href: 'monitors', icon: 'Activity' },
   { titleKey: 'logs', href: 'logs', icon: 'ScrollText' },
+  { titleKey: 'audit', href: 'audit', icon: 'Shield' },
   { titleKey: 'incidents', href: 'incidents', icon: 'AlertTriangle' },
   { titleKey: 'alerts', href: 'alerts', icon: 'BellRing' },
   // 注意："密钥"是项目级页面（/{org}/projects/{project}/secrets），
@@ -85,6 +86,7 @@ export const SIDEBAR_ITEMS = [
   { titleKey: 'notifications', href: 'notifications', icon: 'Bell' },
   { titleKey: 'team', href: 'team', icon: 'Users' },
   { titleKey: 'settings', href: 'settings', icon: 'Settings' },
+  { titleKey: 'resume', href: 'https://my.feishu.cn/docx/H6fWdixvHoNGouxEztCcyj7Kngd?from=from_copylink', icon: 'FileText', external: true },
 ] as const
 
 export const PROJECT_STATUSES = {

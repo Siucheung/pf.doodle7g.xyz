@@ -4,7 +4,7 @@ import {DashboardHeader} from '@/components/dashboard/Header'
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Badge} from '@/components/ui/badge'
-import {Plus, Activity, ExternalLink} from 'lucide-react'
+import {Plus, Activity, ExternalLink, ShieldCheck} from 'lucide-react'
 import Link from 'next/link'
 import {formatDistanceToNow} from 'date-fns'
 import {getTranslations} from 'next-intl/server'
@@ -63,6 +63,30 @@ export default async function MonitorsPage({
             {t('addMonitor')}
           </Button>
         </div>
+
+        {/* Gatus 基础设施健康看板入口 */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">{t('gotoGatus')}</p>
+                <p className="text-sm text-muted-foreground">{t('gatusDesc')}</p>
+              </div>
+            </div>
+            <a
+              href="http://localhost:8080"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              {t('openGatus')}
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </CardContent>
+        </Card>
 
         {monitors.length === 0 ? (
           <Card>

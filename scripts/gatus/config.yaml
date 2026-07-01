@@ -1,0 +1,110 @@
+# ============================================================
+# Gatus 健康检查配置
+# 监控 OpsPilot 及所有依赖服务的运行状态
+# ============================================================
+# 存储配置：复用 OpsPilot CI PostgreSQL
+storage:
+  type: postgres
+  path: "postgres://gatus:gatus@postgres:5432/gatus?sslmode=disable"
+  caching: true
+  maximum-number-of-results: 100
+  maximum-number-of-events: 50
+
+# 告警配置（可选）
+alerting:
+  # 当 Gatus 检测到服务异常时，可通过 Webhook 通知 OpsPilot
+  custom:
+    - type: opspilot-webhook
+      url: "http://host.docker.internal:3000/api/webhooks/gatus"
+      body: |
+        {
+          "name": "{{ .Name }}",
+          "group": "{{ .Group }}",
+          "status": "{{ .Status }}",
+          "result": "{{ .Result }}"
+        }
+
+# 端点列表
+endpoints:
+  # ===== OpsPilot 核心服务 =====
+  - name: opspilot-app
+    group: core
+    url: "http://host.docker.internal:3000/api/ping"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY].status == ok"
+    alerts:
+      - type: custom
+        description: "OpsPilot 应用不可达"
+        send-on-resolved: true
+
+  # ===== 通知网关 =====
+  - name: apprise
+    group: infrastructure
+    url: "http://apprise:8000/status"
+    interval: 2m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: custom
+        description: "Apprise 通知网关不可达"
+        send-on-resolved: true
+
+  # ===== 告警管理 =====
+  - name: alertmanager
+    group: infrastructure
+    url: "http://alertmanager:9093/api/v2/status"
+    interval: 2m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: custom
+        description: "Alertmanager 告警管理不可达"
+        send-on-resolved: true
+
+  # ===== CI/CD =====
+  - name: woodpecker-server
+    group: infrastructure
+    url: "http://woodpecker-server:8000"
+    interval: 2m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: custom
+        description: "Woodpecker CI 服务不可达"
+        send-on-resolved: true
+
+  - name: gitea
+    group: infrastructure
+    url: "http://gitea:3000"
+    interval: 2m
+    conditions:
+      - "[STATUS] == 200"
+    alerts:
+      - type: custom
+        description: "Gitea 代码仓库不可达"
+        send-on-resolved: true
+
+  # ===== 数据库 =====
+  - name: postgresql
+    group: infrastructure
+    url: "postgres://postgres:postgres@postgres:5432/postgres"
+    interval: 2m
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - type: custom
+        description: "PostgreSQL 数据库不可达"
+        send-on-resolved: true
+
+  # ===== DNS 解析 =====
+  - name: dns-resolution
+    group: network
+    url: "8.8.8.8"
+    interval: 5m
+    dns:
+      query-name: "google.com"
+      query-type: "A"
+    conditions:
+      - "[DNS_RCODE] == NOERROR"

@@ -12,12 +12,15 @@ import {
   AlertTriangle,
   BellRing,
   Bell,
+  Shield,
   Users,
   Settings,
   ChevronRight,
   Building2,
   LogOut,
   Crown,
+  User,
+  FileText,
 } from 'lucide-react'
 import {cn} from '@/lib/utils'
 import {SIDEBAR_ITEMS} from '@/lib/constants'
@@ -45,8 +48,10 @@ const iconMap: Record<string, React.ElementType> = {
   AlertTriangle,
   BellRing,
   Bell,
+  Shield,
   Users,
   Settings,
+  FileText,
 }
 
 export function AppSidebar({
@@ -129,11 +134,30 @@ function DesktopSidebar({
       <ScrollArea className="flex-1">
         <nav className="space-y-1 p-2">
           {SIDEBAR_ITEMS.map((item) => {
-            const href = `/${orgSlug}${item.href ? `/${item.href}` : ''}`
+            const isExternal = 'external' in item && (item as any).external
+            const href = isExternal ? item.href : `/${orgSlug}${item.href ? `/${item.href}` : ''}`
             const Icon = iconMap[item.icon] || LayoutDashboard
             // Match based on the page segment (after org slug)
             const pageSegment = pathname.split('/').filter(Boolean)[1] || ''
-            const isActive = item.href === '' ? pageSegment === '' : pageSegment === item.href
+            const isActive = !isExternal && (item.href === '' ? pageSegment === '' : pageSegment === item.href)
+
+            if (isExternal) {
+              return (
+                <a
+                  key={item.titleKey}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {t(item.titleKey)}
+                </a>
+              )
+            }
 
             return (
               <Link
@@ -204,11 +228,30 @@ function MobileSidebar({
       <ScrollArea className="flex-1">
         <nav className="space-y-1 p-2">
           {SIDEBAR_ITEMS.map((item) => {
-            const href = `/${orgSlug}${item.href ? `/${item.href}` : ''}`
+            const isExternal = 'external' in item && (item as any).external
+            const href = isExternal ? item.href : `/${orgSlug}${item.href ? `/${item.href}` : ''}`
             const Icon = iconMap[item.icon] || LayoutDashboard
             // Match based on the page segment (after org slug)
             const pageSegment = pathname.split('/').filter(Boolean)[1] || ''
-            const isActive = item.href === '' ? pageSegment === '' : pageSegment === item.href
+            const isActive = !isExternal && (item.href === '' ? pageSegment === '' : pageSegment === item.href)
+
+            if (isExternal) {
+              return (
+                <a
+                  key={item.titleKey}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {t(item.titleKey)}
+                </a>
+              )
+            }
 
             return (
               <Link
@@ -248,6 +291,7 @@ function OrgSwitcher({
       name: string
       slug: string
     }
+    role: string
   }>
   currentOrg?: { organization: { id: string; name: string; slug: string } }
   t: (key: string) => string
@@ -306,6 +350,7 @@ function UserMenu({
   }>
 }) {
   const tCommon = useTranslations('common')
+  const tNav = useTranslations('nav')
   const tAuth = useTranslations('auth')
   const initials = (user.full_name || user.email)
     .split(' ')
@@ -314,37 +359,91 @@ function UserMenu({
     .toUpperCase()
     .slice(0, 2)
 
+  const topRole = memberships.reduce<string>((prev, m) => {
+    const rank = { owner: 3, admin: 2, member: 1, viewer: 0 }
+    return (rank[m.role as keyof typeof rank] || 0) > (rank[prev as keyof typeof rank] || 0)
+      ? m.role
+      : prev
+  }, 'viewer')
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="ghost" className="w-full justify-start gap-2 px-3" nativeButton={false} render={<span />}>
-          <Avatar className="h-6 w-6">
+      <DropdownMenuTrigger className="w-full">
+        <Button variant="ghost" className="w-full justify-start gap-3 px-3" nativeButton={false} render={<span />}>
+          <Avatar className="h-7 w-7">
             <AvatarImage src={user.avatar_url || undefined} />
             <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
-          <span className="truncate text-sm">{user.full_name || user.email}</span>
+          <div className="flex flex-col items-start leading-tight min-w-0">
+            <span className="truncate text-sm font-medium">{user.full_name || tCommon('unknown')}</span>
+            <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+          </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>
-            <p className="text-sm font-medium">{user.full_name || tCommon('unknown')}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-          <Link href="/settings/profile">{tCommon('profile')}</Link>
-        </DropdownMenuItem>
+      <DropdownMenuContent align="start" className="w-64">
+        {/* 用户信息头部 */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={user.avatar_url || undefined} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col min-w-0">
+            <p className="text-sm font-medium truncate">{user.full_name || tCommon('unknown')}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+          </div>
+        </div>
+
+        {/* 角色与组织信息 */}
+        {memberships.length > 0 && (
+          <>
+            <div className="px-4 pb-2">
+              <div className="flex flex-wrap gap-1">
+                {memberships.slice(0, 2).map((m) => (
+                  <span
+                    key={m.organization_id}
+                    className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    <Building2 className="h-3 w-3" />
+                    {m.organization.name}
+                    {m.role === 'owner' && <Crown className="h-3 w-3 text-yellow-500" />}
+                  </span>
+                ))}
+                {memberships.length > 2 && (
+                  <span className="text-xs text-muted-foreground">+{memberships.length - 2}</span>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         <DropdownMenuSeparator />
+
+        {/* 操作菜单 */}
+        <DropdownMenuGroup>
+          <DropdownMenuItem className="cursor-pointer">
+            <Link href="/settings/profile" className="flex w-full items-center gap-2">
+              <User className="h-4 w-4" />
+              {tCommon('profile')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
+            <Link href="/settings" className="flex w-full items-center gap-2">
+              <Settings className="h-4 w-4" />
+              {tNav('settings')}
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
         <form action="/auth/signout" method="post">
-          <DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
             <button type="submit" className="flex w-full items-center gap-2 text-destructive">
               <LogOut className="h-4 w-4" />
               {tAuth('signOut')}
             </button>
           </DropdownMenuItem>
         </form>
-        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

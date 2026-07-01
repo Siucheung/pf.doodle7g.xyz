@@ -24,8 +24,8 @@ export function AuthForm({mode = 'login'}: AuthFormProps) {
   const t = useTranslations('auth')
 
   const [isLogin, setIsLogin] = useState(mode === 'login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('seancheung.letter@qq.com')
+  const [password, setPassword] = useState('RZnAO%7hz&a3v6')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)

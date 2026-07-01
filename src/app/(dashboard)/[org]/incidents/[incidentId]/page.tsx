@@ -187,7 +187,7 @@ function IncidentStatusBadge({status}: {status: string}) {
 
 function EventTypeBadge({eventType, t}: {eventType: string; t: (key: string) => string}) {
   const labels: Record<string, string> = {
-    status_change: t('statusChanged', {default: 'Status changed'}),
+    status_change: t('statusChanged'),
     comment: t('comment'),
     assignment: t('assignment'),
     trigger: t('triggered'),

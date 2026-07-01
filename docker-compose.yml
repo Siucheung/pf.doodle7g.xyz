@@ -1,15 +1,23 @@
 # ============================================================
 # OpsPilot - 本地开发依赖服务
-# Gitea（代码托管 Forge）+ Woodpecker CI（持续集成）+ Apprise（通知网关）
+# ============================================================
+# Gitea（代码托管 Forge）+ Woodpecker CI（持续集成）
+# + Apprise（通知网关）+ Alertmanager（告警管理）+ Gatus（健康看板）
 # ============================================================
 # 使用方式：
 #   docker compose up -d
 #   docker compose down
 #
 # 服务访问：
-#   Gitea:     http://localhost:3001
-#   Woodpecker: http://localhost:8000
-#   Apprise:   http://localhost:8001
+#   Gitea:        http://localhost:3001
+#   Woodpecker:   http://localhost:8000
+#   Apprise:      http://localhost:8001
+#   Alertmanager: http://localhost:9093
+#   Gatus:        http://localhost:8080
+#   MinIO:        http://localhost:9001
+#   MinIO API:    http://localhost:9000
+#   Caddy:        http://localhost（统一入口）
+#                 配置 /etc/hosts 后使用 subdomain 访问各服务
 # ============================================================
 
 services:
@@ -120,6 +128,78 @@ services:
       timeout: 5s
       retries: 3
 
+  # ===== Gatus（服务健康看板） =====
+  # 自动监控所有依赖服务的健康状态
+  # 官方文档：https://github.com/TwiN/gatus
+  gatus:
+    image: twinproduction/gatus:latest
+    container_name: opspilot-gatus
+    restart: unless-stopped
+    volumes:
+      - ./scripts/gatus/config.yaml:/config/config.yaml:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/v1/endpoints/statuses >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ===== MinIO（S3 兼容对象存储） =====
+  # 用于 WAL-G 备份存储 + 其他 S3 兼容场景
+  minio:
+    image: minio/minio:latest
+    container_name: opspilot-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Web 控制台
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9000/minio/health/live >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ===== WAL-G（PostgreSQL 备份 Sidecar） =====
+  # 自动定时备份 PostgreSQL 到 MinIO
+  wal-g:
+    build:
+      context: .
+      dockerfile: Dockerfile.wal-g
+    container_name: opspilot-wal-g
+    restart: unless-stopped
+    environment:
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - WALG_S3_PREFIX=s3://opspilot-backups/postgres
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - AWS_ENDPOINT=http://minio:9000
+      - AWS_REGION=us-east-1
+      - AWS_S3_FORCE_PATH_STYLE=true
+      - WALG_COMPRESSION_METHOD=lz4
+      - WALG_DELTA_MAX_STEPS=6
+      - BACKUP_CRON=${WALG_BACKUP_CRON:-0 2 * * *}
+      - WALG_RETENTION_DAYS=${WALG_RETENTION_DAYS:-30}
+    volumes:
+      - ./scripts/wal-g:/scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
   # ===== Apprise（统一通知网关） =====
   # 提供 REST API 发送通知到 130+ 服务（Slack、Telegram、Discord、邮件等）
   # API 文档：https://github.com/caronc/apprise-api
@@ -155,6 +235,7 @@ services:
       # 以下覆盖 init-ci-dbs.sh 中的默认密码
       - GITEA_DB_PASSWORD=${GITEA_DB_PASSWORD:-gitea}
       - WOODPECKER_DB_PASSWORD=${WOODPECKER_DB_PASSWORD:-woodpecker}
+      - GATUS_DB_PASSWORD=${GATUS_DB_PASSWORD:-gatus}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -166,6 +247,34 @@ services:
     ports:
       - "5433:5432"
 
+  # ===== Caddy（反向代理 + 自动 HTTPS） =====
+  # 统一端口访问所有依赖服务
+  # 使用方式：配置 /etc/hosts 后访问 http://*.localhost
+  # 生产部署时替换为真实域名即可自动获取 Let's Encrypt 证书
+  caddy:
+    image: caddy:2.11-alpine
+    container_name: opspilot-caddy
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      - TZ=Asia/Shanghai
+    depends_on:
+      - gitea
+      - woodpecker-server
+      - alertmanager
+      - gatus
+      - apprise
+      - minio
+
 volumes:
   gitea-data:
   woodpecker-server-data:
@@ -173,3 +282,7 @@ volumes:
   ci-postgres-data:
   apprise-config:
   alertmanager-data:
+  minio-data:
+  gatus-data:
+  caddy-data:
+  caddy-config:

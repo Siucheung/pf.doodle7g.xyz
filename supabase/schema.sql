@@ -1,17 +1,24 @@
 -- ============================================================
 -- OpsPilot - Software Operations Platform
 -- Supabase Database Schema
--- Run this in Supabase Dashboard → SQL Editor
+-- 执行顺序（SQL Editor 逐文件执行）：
+--   1. schema.sql           ← 本文件：建表/索引/触发器
+--   2. migrations/*.sql     ← 新增表定义（按文件名顺序）
+--   3. rls-policies.sql     ← 行级安全策略（依赖前两步的表和函数）
 -- ============================================================
 
 -- ===== Extensions =====
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ===== Custom Types =====
-CREATE TYPE public.app_role AS ENUM ('owner', 'admin', 'member', 'viewer');
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
+    CREATE TYPE public.app_role AS ENUM ('owner', 'admin', 'member', 'viewer');
+  END IF;
+END $$;
 
 -- ===== Organizations (Tenants) =====
-CREATE TABLE public.organizations (
+CREATE TABLE IF NOT EXISTS public.organizations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
@@ -22,7 +29,7 @@ CREATE TABLE public.organizations (
 );
 
 -- ===== Organization Members =====
-CREATE TABLE public.organization_members (
+CREATE TABLE IF NOT EXISTS public.organization_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -34,7 +41,7 @@ CREATE TABLE public.organization_members (
 );
 
 -- ===== User Profiles =====
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT,
   full_name TEXT,
@@ -44,7 +51,7 @@ CREATE TABLE public.profiles (
 );
 
 -- ===== Projects =====
-CREATE TABLE public.projects (
+CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -59,7 +66,7 @@ CREATE TABLE public.projects (
 );
 
 -- ===== Deployments =====
-CREATE TABLE public.deployments (
+CREATE TABLE IF NOT EXISTS public.deployments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -77,7 +84,7 @@ CREATE TABLE public.deployments (
 );
 
 -- ===== Monitors =====
-CREATE TABLE public.monitors (
+CREATE TABLE IF NOT EXISTS public.monitors (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -92,7 +99,7 @@ CREATE TABLE public.monitors (
 );
 
 -- ===== Monitor Checks (Time-series) =====
-CREATE TABLE public.monitor_checks (
+CREATE TABLE IF NOT EXISTS public.monitor_checks (
   id BIGSERIAL PRIMARY KEY,
   monitor_id UUID NOT NULL REFERENCES public.monitors(id) ON DELETE CASCADE,
   status_code INTEGER,
@@ -103,7 +110,7 @@ CREATE TABLE public.monitor_checks (
 );
 
 -- ===== Logs =====
-CREATE TABLE public.logs (
+CREATE TABLE IF NOT EXISTS public.logs (
   id BIGSERIAL PRIMARY KEY,
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -116,7 +123,7 @@ CREATE TABLE public.logs (
 );
 
 -- ===== Incidents =====
-CREATE TABLE public.incidents (
+CREATE TABLE IF NOT EXISTS public.incidents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
@@ -132,7 +139,7 @@ CREATE TABLE public.incidents (
 );
 
 -- ===== Incident Events =====
-CREATE TABLE public.incident_events (
+CREATE TABLE IF NOT EXISTS public.incident_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   incident_id UUID NOT NULL REFERENCES public.incidents(id) ON DELETE CASCADE,
   actor_id UUID REFERENCES auth.users(id),
@@ -144,7 +151,7 @@ CREATE TABLE public.incident_events (
 );
 
 -- ===== Webhooks =====
-CREATE TABLE public.webhooks (
+CREATE TABLE IF NOT EXISTS public.webhooks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   url TEXT NOT NULL,
@@ -157,7 +164,7 @@ CREATE TABLE public.webhooks (
 
 -- ===== Forge Repos（代码托管平台仓库映射） =====
 -- 将 OpsPilot 项目与 Gitea/Woodpecker 中的仓库关联
-CREATE TABLE public.forge_repos (
+CREATE TABLE IF NOT EXISTS public.forge_repos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -173,7 +180,7 @@ CREATE TABLE public.forge_repos (
 
 -- ===== CI Pipelines（流水线记录） =====
 -- 来自 Woodpecker CI 的流水线执行记录
-CREATE TABLE public.ci_pipelines (
+CREATE TABLE IF NOT EXISTS public.ci_pipelines (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
@@ -198,7 +205,7 @@ CREATE TABLE public.ci_pipelines (
 
 -- ===== Notification Channels（通知渠道） =====
 -- 存储组织级的通知渠道配置，每个渠道由一个 Apprise URL 定义
-CREATE TABLE public.notification_channels (
+CREATE TABLE IF NOT EXISTS public.notification_channels (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -211,20 +218,20 @@ CREATE TABLE public.notification_channels (
 );
 
 -- ===== Indexes =====
-CREATE INDEX idx_projects_org ON public.projects(organization_id);
-CREATE INDEX idx_deployments_project ON public.deployments(project_id);
-CREATE INDEX idx_deployments_org ON public.deployments(organization_id);
-CREATE INDEX idx_deployments_created ON public.deployments(created_at DESC);
-CREATE INDEX idx_monitors_project ON public.monitors(project_id);
-CREATE INDEX idx_monitor_checks_monitor_time ON public.monitor_checks(monitor_id, checked_at DESC);
-CREATE INDEX idx_logs_project_time ON public.logs(project_id, created_at DESC);
-CREATE INDEX idx_incidents_org_status ON public.incidents(organization_id, status);
-CREATE INDEX idx_forge_repos_project ON public.forge_repos(project_id);
-CREATE INDEX idx_forge_repos_org ON public.forge_repos(organization_id);
-CREATE INDEX idx_ci_pipelines_project ON public.ci_pipelines(project_id);
-CREATE INDEX idx_ci_pipelines_org ON public.ci_pipelines(organization_id);
-CREATE INDEX idx_ci_pipelines_created ON public.ci_pipelines(created_at DESC);
-CREATE INDEX idx_notification_channels_org ON public.notification_channels(organization_id);
+CREATE INDEX IF NOT EXISTS idx_projects_org ON public.projects(organization_id);
+CREATE INDEX IF NOT EXISTS idx_deployments_project ON public.deployments(project_id);
+CREATE INDEX IF NOT EXISTS idx_deployments_org ON public.deployments(organization_id);
+CREATE INDEX IF NOT EXISTS idx_deployments_created ON public.deployments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_monitors_project ON public.monitors(project_id);
+CREATE INDEX IF NOT EXISTS idx_monitor_checks_monitor_time ON public.monitor_checks(monitor_id, checked_at DESC);
+CREATE INDEX IF NOT EXISTS idx_logs_project_time ON public.logs(project_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_incidents_org_status ON public.incidents(organization_id, status);
+CREATE INDEX IF NOT EXISTS idx_forge_repos_project ON public.forge_repos(project_id);
+CREATE INDEX IF NOT EXISTS idx_forge_repos_org ON public.forge_repos(organization_id);
+CREATE INDEX IF NOT EXISTS idx_ci_pipelines_project ON public.ci_pipelines(project_id);
+CREATE INDEX IF NOT EXISTS idx_ci_pipelines_org ON public.ci_pipelines(organization_id);
+CREATE INDEX IF NOT EXISTS idx_ci_pipelines_created ON public.ci_pipelines(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notification_channels_org ON public.notification_channels(organization_id);
 
 -- ===== Triggers: Auto-update updated_at =====
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -235,21 +242,30 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS set_updated_at ON public.organizations;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.organizations
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.projects;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.projects
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.deployments;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.deployments
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.monitors;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.monitors
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.incidents;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.incidents
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.forge_repos;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.forge_repos
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.ci_pipelines;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.ci_pipelines
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.notification_channels;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.notification_channels
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON public.profiles;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
