@@ -38,7 +38,7 @@ async function getIncident(orgSlug: string, incidentId: string) {
 
   const {data: events} = await supabase
     .from('incident_events')
-    .select('*, actor:profiles(full_name)')
+    .select('*')
     .eq('incident_id', incidentId)
     .order('created_at', {ascending: false })
 
