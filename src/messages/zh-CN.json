@@ -92,7 +92,24 @@
     "orgNotFound": "组织不存在",
     "noPermission": "你没有权限创建项目",
     "projectCreated": "项目创建成功！",
-    "unexpectedError": "发生未知错误"
+    "unexpectedError": "发生未知错误",
+    "secrets": "密钥",
+    "ci": "CI/CD",
+    "ciDesc": "流水线运行和构建历史",
+    "triggerPipeline": "触发流水线",
+    "noPipelines": "还没有流水线",
+    "noPipelinesDesc": "触发构建或将代码推送到仓库后，流水线将显示在这里",
+    "deploymentHistory": "项目的部署历史",
+    "uptimeMonitoring": "项目的正常运行监控",
+    "recentLogEntries": "最近的日志记录",
+    "issuesAffecting": "影响项目的问题",
+    "noDeploymentsTriggered": "触发部署后，部署记录将显示在这里",
+    "noActiveIncidentsDesc": "该项目没有未解决的工单",
+    "noLogsGenerated": "项目生成输出后，日志将显示在这里",
+    "noMonitorsDesc": "设置监控以跟踪端点健康状态",
+    "backToProject": "返回项目",
+    "deployment": "部署",
+    "critical": "严重"
   },
   "deployments": {
     "title": "部署",
@@ -272,6 +289,8 @@
     "monitorStatus": "监控状态",
     "healthEndpoints": "端点健康状态",
     "noMonitorsConfigured": "还没有配置监控",
+    "everyInterval": "每 {seconds} 秒 · 期望 {status}",
+    "by": "操作者",
     "setupMonitors": "设置监控以跟踪端点健康状态"
   }
 }

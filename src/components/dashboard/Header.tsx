@@ -12,6 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -104,37 +105,39 @@ export function DashboardHeader({ user, memberships }: DashboardHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <DropdownMenuLabel>{t('notifications')}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="space-y-1">
-              <DropdownMenuItem className="cursor-pointer">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">{t('notifications')}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Project &quot;API Service&quot; build failed on main branch
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t('minutesAgo', {count: 2})}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Monitor down</p>
-                  <p className="text-xs text-muted-foreground">
-                    https://api.example.com health check failed
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t('minutesAgo', {count: 15})}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Incident resolved</p>
-                  <p className="text-xs text-muted-foreground">
-                    High latency issue has been resolved
-                  </p>
-                  <p className="text-xs text-muted-foreground">{t('hoursAgo', {count: 1})}</p>
-                </div>
-              </DropdownMenuItem>
-            </div>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{t('notifications')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="space-y-1">
+                <DropdownMenuItem className="cursor-pointer">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">{t('notifications')}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Project &quot;API Service&quot; build failed on main branch
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t('minutesAgo', {count: 2})}</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">Monitor down</p>
+                    <p className="text-xs text-muted-foreground">
+                      https://api.example.com health check failed
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t('minutesAgo', {count: 15})}</p>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm font-medium">Incident resolved</p>
+                    <p className="text-xs text-muted-foreground">
+                      High latency issue has been resolved
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t('hoursAgo', {count: 1})}</p>
+                  </div>
+                </DropdownMenuItem>
+              </div>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
@@ -156,28 +159,30 @@ export function DashboardHeader({ user, memberships }: DashboardHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              <p className="text-sm font-medium">{user.full_name || t('unknown')}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Link href="/dashboard/settings/profile">{t('profile')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/dashboard/settings">{tNav('settings')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <form action="/auth/signout" method="post">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>
+                <p className="text-sm font-medium">{user.full_name || t('unknown')}</p>
+                <p className="text-xs text-muted-foreground">{user.email}</p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <button
-                  type="submit"
-                  className="w-full text-destructive"
-                >
-                  {t('signOut')}
-                </button>
+                <Link href="/dashboard/settings/profile">{t('profile')}</Link>
               </DropdownMenuItem>
-            </form>
+              <DropdownMenuItem>
+                <Link href="/dashboard/settings">{tNav('settings')}</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <form action="/auth/signout" method="post">
+                <DropdownMenuItem>
+                  <button
+                    type="submit"
+                    className="w-full text-destructive"
+                  >
+                    {t('signOut')}
+                  </button>
+                </DropdownMenuItem>
+              </form>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { DashboardHeader } from '@/components/dashboard/Header'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,13 +14,14 @@ import {
   Activity,
   ScrollText,
   ExternalLink,
+  PlayCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { DEPLOYMENT_STATUSES, PROJECT_STATUSES } from '@/lib/constants'
+import { DEPLOYMENT_STATUSES, PROJECT_STATUSES, CI_PIPELINE_STATUSES } from '@/lib/constants'
 import { DeleteProjectButton } from './delete-button'
 import { cn } from '@/lib/utils'
-import type { Deployment, Monitor, LogEntry, Incident } from '@/lib/db-types'
+import type { Deployment, Monitor, LogEntry, Incident, CiPipeline } from '@/lib/db-types'
 
 async function getProject(orgSlug: string, projectSlug: string) {
   const supabase = await createClient()
@@ -41,7 +43,14 @@ async function getProject(orgSlug: string, projectSlug: string) {
 
   if (!project) return null
 
-  // Fetch related data
+  // 获取关联数据
+  const ciPipelinesResult = await supabase
+    .from('ci_pipelines')
+    .select('*')
+    .eq('project_id', project.id)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
   const [deploymentsResult, monitorsResult, logsResult, incidentsResult] =
     await Promise.all([
       supabase
@@ -75,6 +84,7 @@ async function getProject(orgSlug: string, projectSlug: string) {
     monitors: monitorsResult.data || [],
     logs: logsResult.data || [],
     incidents: incidentsResult.data || [],
+    ciPipelines: ciPipelinesResult.data || [],
   }
 }
 
@@ -85,12 +95,15 @@ export default async function ProjectPage({
 }) {
   const { org, project } = await params
   const data = await getProject(org, project)
+  const t = await getTranslations('projects')
+  const st = await getTranslations('status')
+  const secT = await getTranslations('secrets')
 
   if (!data) {
     redirect('/login')
   }
 
-  const { project: proj, deployments, monitors, logs, incidents } = data
+  const { project: proj, deployments, monitors, logs, incidents, ciPipelines } = data
 
   return (
     <>
@@ -100,7 +113,7 @@ export default async function ProjectPage({
       />
 
       <div className="p-6 lg:p-8 space-y-6">
-        {/* Project Header */}
+        {/* 项目头部 */}
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -134,14 +147,14 @@ export default async function ProjectPage({
               </a>
             )}
             <p className="text-xs text-muted-foreground">
-              Created {formatDistanceToNow(new Date(proj.created_at), { addSuffix: true })}
+              {t('created')} {formatDistanceToNow(new Date(proj.created_at), { addSuffix: true })}
             </p>
           </div>
 
           <div className="flex gap-2">
             <Button variant="outline" >
               <Link href={`/${org}/projects`}>
-                Back to Projects
+                {t('backToProjects')}
               </Link>
             </Button>
             <DeleteProjectButton projectId={proj.id} orgSlug={org} />
@@ -150,12 +163,12 @@ export default async function ProjectPage({
 
         <Separator />
 
-        {/* Tabs */}
+        {/* Tab 标签页 */}
         <Tabs defaultValue="deployments" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="overview">{t('overview')}</TabsTrigger>
             <TabsTrigger value="deployments">
-              Deployments
+              {t('deployments')}
               {deployments.length > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {deployments.length}
@@ -163,7 +176,7 @@ export default async function ProjectPage({
               )}
             </TabsTrigger>
             <TabsTrigger value="monitors">
-              Monitors
+              {t('monitors')}
               {monitors.length > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {monitors.length}
@@ -171,7 +184,7 @@ export default async function ProjectPage({
               )}
             </TabsTrigger>
             <TabsTrigger value="logs">
-              Logs
+              {t('logs')}
               {logs.length > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {logs.length}
@@ -179,7 +192,7 @@ export default async function ProjectPage({
               )}
             </TabsTrigger>
             <TabsTrigger value="incidents">
-              Incidents
+              {t('incidents')}
               {incidents.length > 0 && (
                 <Badge variant="secondary" className="ml-2">
                   {incidents.length}
@@ -187,30 +200,38 @@ export default async function ProjectPage({
               )}
             </TabsTrigger>
             <TabsTrigger value="secrets">
-              Secrets
+              {t('secrets')}
+            </TabsTrigger>
+            <TabsTrigger value="ci">
+              {t('ci')}
+              {ciPipelines.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {ciPipelines.length}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
+          {/* 概览标签页 */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-3">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Total Deployments
+                    {t('totalDeployments')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{deployments.length}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {deployments.filter((d: Deployment) => d.status === 'success').length} successful
+                    {deployments.filter((d: Deployment) => d.status === 'success').length} {t('successful')}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Active Monitors
+                    {t('activeMonitors')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -218,20 +239,20 @@ export default async function ProjectPage({
                     {monitors.filter((m) => m.enabled).length}/{monitors.length}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {monitors.length > 0 ? 'Running' : 'No monitors'}
+                    {monitors.length > 0 ? t('running') : t('noMonitors')}
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Active Incidents
+                    {t('activeIncidents')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{incidents.length}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {incidents.filter((i) => i.severity === 'critical').length} critical
+                    {incidents.filter((i) => i.severity === 'critical').length} {t('critical')}
                   </p>
                 </CardContent>
               </Card>
@@ -240,7 +261,7 @@ export default async function ProjectPage({
             {deployments.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Deployments</CardTitle>
+                  <CardTitle>{t('recentDeployments')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -252,7 +273,7 @@ export default async function ProjectPage({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium truncate">
-                              {deployment.commit_message || deployment.branch || 'Deployment'}
+                              {deployment.commit_message || deployment.branch || t('deployment')}
                             </p>
                             <Badge
                               variant={
@@ -278,19 +299,19 @@ export default async function ProjectPage({
             )}
           </TabsContent>
 
-          {/* Deployments Tab */}
+          {/* 部署标签页 */}
           <TabsContent value="deployments">
             <Card>
               <CardHeader>
-                <CardTitle>Deployments</CardTitle>
-                <CardDescription>Deployment history for this project</CardDescription>
+                <CardTitle>{t('deployments')}</CardTitle>
+                <CardDescription>{t('deploymentHistory')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {deployments.length === 0 ? (
                   <EmptyState
                     icon={<Rocket className="h-8 w-8" />}
-                    title="No deployments yet"
-                    description="Deployments will appear here once you trigger them"
+                    title={t('noDeployments')}
+                    description={t('noDeploymentsTriggered')}
                   />
                 ) : (
                   <div className="space-y-3">
@@ -302,7 +323,7 @@ export default async function ProjectPage({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium truncate">
-                              {deployment.commit_message || deployment.branch || 'Deployment'}
+                              {deployment.commit_message || deployment.branch || t('deployment')}
                             </p>
                             <Badge
                               variant={
@@ -325,7 +346,7 @@ export default async function ProjectPage({
                               {formatDistanceToNow(new Date(deployment.created_at), { addSuffix: true })}
                             </span>
                             {deployment.actor?.full_name && (
-                              <span>by {deployment.actor.full_name}</span>
+                              <span>{st('by')} {deployment.actor.full_name}</span>
                             )}
                           </div>
                         </div>
@@ -337,19 +358,19 @@ export default async function ProjectPage({
             </Card>
           </TabsContent>
 
-          {/* Monitors Tab */}
+          {/* 监控标签页 */}
           <TabsContent value="monitors">
             <Card>
               <CardHeader>
-                <CardTitle>Monitors</CardTitle>
-                <CardDescription>Uptime monitoring for this project</CardDescription>
+                <CardTitle>{t('monitors')}</CardTitle>
+                <CardDescription>{t('uptimeMonitoring')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {monitors.length === 0 ? (
                   <EmptyState
                     icon={<Activity className="h-8 w-8" />}
-                    title="No monitors configured"
-                    description="Set up monitors to track your endpoint health"
+                    title={st('noMonitorsConfigured')}
+                    description={t('noMonitorsDesc')}
                   />
                 ) : (
                   <div className="space-y-3">
@@ -371,12 +392,12 @@ export default async function ProjectPage({
                               {monitor.method} {monitor.url}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Every {monitor.interval_seconds}s · Expects {monitor.expected_status}
+                              {st('everyInterval', { seconds: monitor.interval_seconds, status: monitor.expected_status })}
                             </p>
                           </div>
                         </div>
                         <Badge variant={monitor.enabled ? 'default' : 'secondary'}>
-                          {monitor.enabled ? 'Active' : 'Paused'}
+                          {monitor.enabled ? st('active') : st('paused')}
                         </Badge>
                       </div>
                     ))}
@@ -386,19 +407,19 @@ export default async function ProjectPage({
             </Card>
           </TabsContent>
 
-          {/* Logs Tab */}
+          {/* 日志标签页 */}
           <TabsContent value="logs">
             <Card>
               <CardHeader>
-                <CardTitle>Logs</CardTitle>
-                <CardDescription>Recent log entries</CardDescription>
+                <CardTitle>{t('logs')}</CardTitle>
+                <CardDescription>{t('recentLogEntries')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {logs.length === 0 ? (
                   <EmptyState
                     icon={<ScrollText className="h-8 w-8" />}
-                    title="No logs yet"
-                    description="Logs will appear here when your project generates output"
+                    title={t('noLogs')}
+                    description={t('noLogsGenerated')}
                   />
                 ) : (
                   <div className="space-y-2 max-h-[500px] overflow-y-auto">
@@ -437,19 +458,19 @@ export default async function ProjectPage({
             </Card>
           </TabsContent>
 
-          {/* Incidents Tab */}
+          {/* 工单标签页 */}
           <TabsContent value="incidents">
             <Card>
               <CardHeader>
-                <CardTitle>Incidents</CardTitle>
-                <CardDescription>Issues affecting this project</CardDescription>
+                <CardTitle>{t('incidents')}</CardTitle>
+                <CardDescription>{t('issuesAffecting')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {incidents.length === 0 ? (
                   <EmptyState
                     icon={<Activity className="h-8 w-8" />}
-                    title="No active incidents"
-                    description="This project has no open incidents"
+                    title={t('noIncidents')}
+                    description={t('noActiveIncidentsDesc')}
                   />
                 ) : (
                   <div className="space-y-3">
@@ -485,21 +506,117 @@ export default async function ProjectPage({
             </Card>
           </TabsContent>
 
-          {/* Secrets Tab */}
+          {/* 密钥标签页 */}
           <TabsContent value="secrets">
             <Card>
               <CardHeader>
-                <CardTitle>Secrets</CardTitle>
+                <CardTitle>{t('secrets')}</CardTitle>
                 <CardDescription>
-                  Manage environment variables and secrets for this project
+                  {secT('description')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-12">
-                  <Button onClick={() => window.location.href = `/${org}/projects/${project.slug}/secrets`}>
-                    View All Secrets
-                  </Button>
+                  <Link href={`/${org}/projects/${project.slug}/secrets`}>
+                    <Button>
+                      {secT('viewAllSecrets')}
+                    </Button>
+                  </Link>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* CI/CD 标签页 */}
+          <TabsContent value="ci">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>{t('ci')}</CardTitle>
+                  <CardDescription>
+                    {t('ciDesc')}
+                  </CardDescription>
+                </div>
+                <Button>
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                  {t('triggerPipeline')}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {ciPipelines.length === 0 ? (
+                  <EmptyState
+                    icon={<PlayCircle className="h-8 w-8" />}
+                    title={t('noPipelines')}
+                    description={t('noPipelinesDesc')}
+                  />
+                ) : (
+                  <div className="space-y-3">
+                    {ciPipelines.map((pipeline: CiPipeline) => (
+                      <div
+                        key={pipeline.id}
+                        className="flex items-center justify-between rounded-lg border p-3"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium truncate">
+                              #{pipeline.pipeline_number}{' '}
+                              {pipeline.commit_message || pipeline.branch || t('deployment')}
+                            </p>
+                            <Badge
+                              variant={
+                                pipeline.status === 'success'
+                                  ? 'default'
+                                  : pipeline.status === 'failure' || pipeline.status === 'error'
+                                  ? 'destructive'
+                                  : pipeline.status === 'running'
+                                  ? 'secondary'
+                                  : 'outline'
+                              }
+                            >
+                              {CI_PIPELINE_STATUSES[pipeline.status as keyof typeof CI_PIPELINE_STATUSES] || pipeline.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            {pipeline.event && (
+                              <span className="capitalize">{pipeline.event}</span>
+                            )}
+                            {pipeline.branch && (
+                              <span>{pipeline.branch}</span>
+                            )}
+                            {pipeline.commit_sha && (
+                              <span className="font-mono">{pipeline.commit_sha.slice(0, 7)}</span>
+                            )}
+                            <span>
+                              {formatDistanceToNow(new Date(pipeline.created_at), { addSuffix: true })}
+                            </span>
+                            {pipeline.duration_ms && (
+                              <span>{(pipeline.duration_ms / 1000).toFixed(1)}s</span>
+                            )}
+                          </div>
+                          {pipeline.steps && pipeline.steps.length > 0 && (
+                            <div className="flex items-center gap-2 mt-2">
+                              {(pipeline.steps as Array<{ name: string; status: string }>).map((step, i) => (
+                                <Badge
+                                  key={i}
+                                  variant={
+                                    step.status === 'success'
+                                      ? 'default'
+                                      : step.status === 'failure' || step.status === 'error'
+                                      ? 'destructive'
+                                      : 'outline'
+                                  }
+                                  className="text-[10px] px-2 py-0"
+                                >
+                                  {step.name.split('/').pop()}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

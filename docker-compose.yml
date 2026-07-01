@@ -1,0 +1,127 @@
+# ============================================================
+# OpsPilot - 本地开发依赖服务
+# Gitea（代码托管 Forge）+ Woodpecker CI（持续集成）
+# ============================================================
+# 使用方式：
+#   docker compose up -d
+#   docker compose down
+#
+# 服务访问：
+#   Gitea:     http://localhost:3001
+#   Woodpecker: http://localhost:8000
+# ============================================================
+
+services:
+  # ===== Gitea（Woodpecker 的 Forge） =====
+  gitea:
+    image: gitea/gitea:1.22
+    container_name: opspilot-gitea
+    restart: unless-stopped
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=postgres:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+      - GITEA__server__DOMAIN=localhost
+      - GITEA__server__HTTP_PORT=3000
+      - GITEA__server__ROOT_URL=http://localhost:3001
+      - GITEA__service__DISABLE_REGISTRATION=true
+      - GITEA__service__REQUIRE_SIGNIN_VIEW=false
+    volumes:
+      - gitea-data:/data
+    ports:
+      - "3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ===== Woodpecker Server（CI 控制器 + API） =====
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:3.0
+    container_name: opspilot-woodpecker-server
+    restart: unless-stopped
+    environment:
+      - WOODPECKER_HOST=http://localhost:8000
+      - WOODPECKER_SERVER_HOST=0.0.0.0
+      - WOODPECKER_SERVER_PORT=8000
+      - WOODPECKER_DATABASE_TYPE=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=postgres://woodpecker:woodpecker@postgres:5432/woodpecker?sslmode=disable
+      # Gitea Forge 配置
+      - WOODPECKER_GITEA=true
+      - WOODPECKER_GITEA_URL=http://gitea:3000
+      - WOODPECKER_GITEA_CLIENT=${WOODPECKER_GITEA_CLIENT:-}
+      - WOODPECKER_GITEA_SECRET=${WOODPECKER_GITEA_SECRET:-}
+      # 管理员账号（首次启动时自动创建）
+      - WOODPECKER_ADMIN_USER=opspilot
+      - WOODPECKER_ADMIN_CREATE=token
+      # 密钥：用于 Agent 认证和 Webhook 签名
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET:-change-me-in-production}
+      - WOODPECKER_WEBHOOK_SECRET=${WOODPECKER_WEBHOOK_SECRET:-change-me-in-production}
+    volumes:
+      - woodpecker-server-data:/etc/woodpecker
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ===== Woodpecker Agent（流水线执行器） =====
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:3.0
+    container_name: opspilot-woodpecker-agent
+    restart: unless-stopped
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET:-change-me-in-production}
+      - WOODPECKER_MAX_WORKFLOWS=2
+      # Docker-in-Docker：Agent 在容器内运行 Docker 流水线步骤
+      - WOODPECKER_DOCKER_CONFIG=mtls
+      - DOCKER_HOST=tcp://docker-in-docker:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - woodpecker-server
+      - docker-in-docker
+
+  # ===== Docker-in-Docker（Woodpecker Agent 执行环境） =====
+  docker-in-docker:
+    image: docker:dind
+    container_name: opspilot-docker-dind
+    restart: unless-stopped
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=
+    volumes:
+      - dind-data:/var/lib/docker
+
+  # ===== PostgreSQL（共享数据库：Gitea + Woodpecker） =====
+  postgres:
+    image: postgres:16-alpine
+    container_name: opspilot-ci-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      # 以下覆盖 init-ci-dbs.sh 中的默认密码
+      - GITEA_DB_PASSWORD=${GITEA_DB_PASSWORD:-gitea}
+      - WOODPECKER_DB_PASSWORD=${WOODPECKER_DB_PASSWORD:-woodpecker}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ci-postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-ci-dbs.sh:/docker-entrypoint-initdb.d/init-ci-dbs.sh:ro
+    ports:
+      - "5433:5432"
+
+volumes:
+  gitea-data:
+  woodpecker-server-data:
+  dind-data:
+  ci-postgres-data:

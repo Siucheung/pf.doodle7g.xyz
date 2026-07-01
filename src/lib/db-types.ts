@@ -94,6 +94,49 @@ export interface OrganizationMember {
   profile?: Profile
 }
 
+export interface CiPipeline {
+  id: string
+  project_id: string
+  organization_id: string
+  pipeline_number: number
+  status: string
+  event: string
+  commit_sha: string | null
+  commit_message: string | null
+  branch: string | null
+  author: string | null
+  duration_ms: number | null
+  link_url: string | null
+  steps: CiPipelineStep[]
+  woodpecker_pipeline_id: number | null
+  error_message: string | null
+  started_at: string | null
+  finished_at: string | null
+  created_at: string
+  updated_at: string
+  project?: { name: string; slug: string }
+}
+
+export interface CiPipelineStep {
+  name: string
+  status: string
+  exit_code: number | null
+  duration_ms: number | null
+}
+
+export interface ForgeRepo {
+  id: string
+  project_id: string
+  organization_id: string
+  forge_type: string
+  forge_repo_id: string
+  forge_repo_full_name: string
+  clone_url: string
+  woodpecker_repo_id: number | null
+  created_at: string
+  updated_at: string
+}
+
 export interface InfisicalCredential {
   id: string
   project_id: string

@@ -1,7 +1,7 @@
 'use client'
 
 import {useTranslations} from 'next-intl'
-import {useState} from 'react'
+import {use, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
@@ -14,8 +14,9 @@ import Link from 'next/link'
 export default function NewProjectPage({
   params,
 }: {
-  params: { org: string }
+  params: Promise<{ org: string }>
 }) {
+  const { org } = use(params)
   const router = useRouter()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -37,7 +38,7 @@ export default function NewProjectPage({
           name,
           description: description || null,
           repositoryUrl: repositoryUrl || null,
-          orgSlug: params.org,
+          orgSlug: org,
         }),
       })
 
@@ -55,7 +56,7 @@ export default function NewProjectPage({
         toast.warning(data.warning)
       }
 
-      router.push(`/${params.org}/projects/${data.project.slug}`)
+      router.push(`/${org}/projects/${data.project.slug}`)
     } catch {
       toast.error(t('unexpectedError', {default: 'An unexpected error occurred'}))
     } finally {
@@ -66,7 +67,7 @@ export default function NewProjectPage({
   return (
     <div className="max-w-2xl">
       <Link
-        href={`/${params.org}/projects`}
+        href={`/${org}/projects`}
         className="mb-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
@@ -120,7 +121,7 @@ export default function NewProjectPage({
             {t('createProject')}
           </Button>
           <Button type="button" variant="outline">
-            <Link href={`/${params.org}/projects`}>{t('cancel')}</Link>
+            <Link href={`/${org}/projects`}>{t('cancel')}</Link>
           </Button>
         </div>
       </form>

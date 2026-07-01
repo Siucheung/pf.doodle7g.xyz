@@ -155,6 +155,47 @@ CREATE TABLE public.webhooks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- ===== Forge Repos（代码托管平台仓库映射） =====
+-- 将 OpsPilot 项目与 Gitea/Woodpecker 中的仓库关联
+CREATE TABLE public.forge_repos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+  forge_type TEXT NOT NULL DEFAULT 'gitea',
+  forge_repo_id TEXT NOT NULL,
+  forge_repo_full_name TEXT NOT NULL,
+  clone_url TEXT NOT NULL,
+  woodpecker_repo_id INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(project_id)
+);
+
+-- ===== CI Pipelines（流水线记录） =====
+-- 来自 Woodpecker CI 的流水线执行记录
+CREATE TABLE public.ci_pipelines (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+  pipeline_number INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  event TEXT NOT NULL DEFAULT 'manual',
+  commit_sha TEXT,
+  commit_message TEXT,
+  branch TEXT,
+  author TEXT,
+  duration_ms INTEGER,
+  link_url TEXT,
+  steps JSONB DEFAULT '[]'::jsonb,
+  woodpecker_pipeline_id INTEGER,
+  error_message TEXT,
+  started_at TIMESTAMPTZ,
+  finished_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(project_id, pipeline_number)
+);
+
 -- ===== Indexes =====
 CREATE INDEX idx_projects_org ON public.projects(organization_id);
 CREATE INDEX idx_deployments_project ON public.deployments(project_id);
@@ -164,6 +205,11 @@ CREATE INDEX idx_monitors_project ON public.monitors(project_id);
 CREATE INDEX idx_monitor_checks_monitor_time ON public.monitor_checks(monitor_id, checked_at DESC);
 CREATE INDEX idx_logs_project_time ON public.logs(project_id, created_at DESC);
 CREATE INDEX idx_incidents_org_status ON public.incidents(organization_id, status);
+CREATE INDEX idx_forge_repos_project ON public.forge_repos(project_id);
+CREATE INDEX idx_forge_repos_org ON public.forge_repos(organization_id);
+CREATE INDEX idx_ci_pipelines_project ON public.ci_pipelines(project_id);
+CREATE INDEX idx_ci_pipelines_org ON public.ci_pipelines(organization_id);
+CREATE INDEX idx_ci_pipelines_created ON public.ci_pipelines(created_at DESC);
 
 -- ===== Triggers: Auto-update updated_at =====
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -183,6 +229,10 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.deployments
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.monitors
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.incidents
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.forge_repos
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.ci_pipelines
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();

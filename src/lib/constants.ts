@@ -90,3 +90,21 @@ export const PROJECT_STATUSES = {
   paused: 'Paused',
   archived: 'Archived',
 } as const
+
+export const CI_PIPELINE_STATUSES = {
+  pending: 'Pending',
+  running: 'Running',
+  success: 'Success',
+  failure: 'Failure',
+  error: 'Error',
+  killed: 'Killed',
+} as const
+
+export const CI_PIPELINE_EVENTS = {
+  push: 'Push',
+  pull_request: 'Pull Request',
+  tag: 'Tag',
+  deployment: 'Deployment',
+  manual: 'Manual',
+  cron: 'Cron',
+} as const

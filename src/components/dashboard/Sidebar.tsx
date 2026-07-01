@@ -26,6 +26,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -259,9 +260,10 @@ function OrgSwitcher({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel>{t('organizations')}</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {memberships.map((membership) => (
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{t('organizations')}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {memberships.map((membership) => (
           <DropdownMenuItem key={membership.organization_id}>
             <Link
               href={`/${membership.organization.slug}/projects`}
@@ -272,8 +274,9 @@ function OrgSwitcher({
               {membership.role === 'owner' && <Crown className="h-3 w-3 text-yellow-500" />}
               {membership.role === 'admin' && <Crown className="h-3 w-3 text-blue-500" />}
             </Link>
-          </DropdownMenuItem>
-        ))}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -319,12 +322,13 @@ function UserMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel>
-          <p className="text-sm font-medium">{user.full_name || tCommon('unknown')}</p>
-          <p className="text-xs text-muted-foreground">{user.email}</p>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <p className="text-sm font-medium">{user.full_name || tCommon('unknown')}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem>
           <Link href="/settings/profile">{tCommon('profile')}</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -336,6 +340,7 @@ function UserMenu({
             </button>
           </DropdownMenuItem>
         </form>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

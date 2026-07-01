@@ -86,7 +86,23 @@
     "noLogs": "No logs yet",
     "logsDesc": "Log entries will appear here as your applications generate output",
     "created": "Created",
-    "backToProject": "Back to Project"
+    "backToProject": "Back to Project",
+    "secrets": "Secrets",
+    "ci": "CI/CD",
+    "ciDesc": "Pipeline runs and build history for this project",
+    "triggerPipeline": "Trigger Pipeline",
+    "noPipelines": "No pipelines yet",
+    "noPipelinesDesc": "Pipelines will appear here once you trigger a build or push code to your repository",
+    "deploymentHistory": "Deployment history for this project",
+    "uptimeMonitoring": "Uptime monitoring for this project",
+    "recentLogEntries": "Recent log entries",
+    "issuesAffecting": "Issues affecting this project",
+    "noDeploymentsTriggered": "Deployments will appear here once you trigger them",
+    "noActiveIncidentsDesc": "This project has no open incidents",
+    "noLogsGenerated": "Logs will appear here when your project generates output",
+    "noMonitorsDesc": "Set up monitors to track your endpoint health",
+    "deployment": "Deployment",
+    "critical": "critical"
   },
   "deployments": {
     "title": "Deployments",
@@ -268,6 +284,8 @@
     "monitorStatus": "Monitor Status",
     "healthEndpoints": "Health of your endpoints",
     "noMonitorsConfigured": "No monitors configured",
+    "everyInterval": "Every {seconds}s · Expects {status}",
+    "by": "by",
     "setupMonitors": "Set up monitors to track your endpoint health"
   }
 }

@@ -135,6 +135,24 @@ CREATE POLICY "members_read_events" ON public.incident_events
     )
   );
 
+-- ===== Forge Repos =====
+ALTER TABLE public.forge_repos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "members_read_forge_repos" ON public.forge_repos
+  FOR SELECT USING (organization_id IN (SELECT organization_id FROM public.user_orgs()));
+
+CREATE POLICY "admins_manage_forge_repos" ON public.forge_repos
+  FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
+
+-- ===== CI Pipelines =====
+ALTER TABLE public.ci_pipelines ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "members_read_ci_pipelines" ON public.ci_pipelines
+  FOR SELECT USING (organization_id IN (SELECT organization_id FROM public.user_orgs()));
+
+CREATE POLICY "admins_manage_ci_pipelines" ON public.ci_pipelines
+  FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
+
 -- ===== Webhooks =====
 CREATE POLICY "admins_manage_webhooks" ON public.webhooks
   FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
