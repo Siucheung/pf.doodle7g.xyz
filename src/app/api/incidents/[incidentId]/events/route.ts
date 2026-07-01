@@ -78,7 +78,11 @@ export async function POST(
 
     if (error) {
       console.error('[Incidents] 创建事件记录失败:', error)
-      return NextResponse.json({ error: '创建事件记录失败' }, { status: 500 })
+      return NextResponse.json({ 
+        error: '创建事件记录失败', 
+        detail: error.message,
+        code: error.code 
+      }, { status: 500 })
     }
 
     return NextResponse.json(event, { status: 201 })
