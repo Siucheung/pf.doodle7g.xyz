@@ -53,7 +53,6 @@ export default function NewIncidentClient({
       }
 
       router.push(`/${org}/incidents`)
-      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : common('error'))
     } finally {

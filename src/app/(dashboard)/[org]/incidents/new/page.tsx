@@ -8,22 +8,22 @@ export default async function NewIncidentPage({
   params: { org: string }
 }) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
-  const { data: membership } = await supabase
-    .from('members')
-    .select('org_id')
-    .eq('user_id', user.id)
-    .eq('org_id', params.org)
+  // 验证 org slug 有效（其它页面同模式）
+  const { data: orgData } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('slug', params.org)
     .single()
 
-  if (!membership) redirect('/login')
+  if (!orgData) {
+    redirect('/login')
+  }
 
   const { data: projects } = await supabase
     .from('projects')
     .select('id, name')
-    .eq('org_id', params.org)
+    .eq('organization_id', orgData.id)
     .order('name')
 
   return <NewIncidentClient org={params.org} projects={projects || []} />
