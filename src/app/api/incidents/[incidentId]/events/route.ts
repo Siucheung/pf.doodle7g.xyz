@@ -73,7 +73,7 @@ export async function POST(
         new_value: finalNewValue,
         actor_id: ctx.user.id,
       })
-      .select('*, actor:profiles(full_name)')
+      .select('*')
       .single()
 
     if (error) {

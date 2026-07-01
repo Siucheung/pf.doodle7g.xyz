@@ -55,7 +55,7 @@ export async function GET(
     // 额外查询事件记录
     const { data: events } = await ctx.supabase
       .from('incident_events')
-      .select('*, actor:profiles(full_name)')
+      .select('*')
       .eq('incident_id', incidentId)
       .order('created_at', { ascending: false })
 
