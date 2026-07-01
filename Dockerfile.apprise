@@ -1,0 +1,15 @@
+# ============================================================
+# Apprise 通知网关 - Render 独立部署
+# Render Blueprint 中引用此文件部署 Apprise
+# ============================================================
+# 如果不使用 Blueprint，也可直接在 Render Dashboard 部署：
+#   - Runtime: Docker
+#   - Image: caronc/apprise:latest
+# ============================================================
+
+FROM caronc/apprise:latest
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:8000/status > /dev/null || exit 1
+
+EXPOSE 8000

@@ -1,0 +1,80 @@
+# ============================================================
+# OpsPilot - Render Blueprint
+# 部署方式：在 Render Dashboard → Blueprint → 连接此仓库
+# 或使用 render CLI: render blueprint apply
+# ============================================================
+# 自举监控架构：
+#   Vercel（生产站点）← OpsPilot 监控 → Render（监控站）
+#   Render（监控站）   ← OpsPilot 监控 → Vercel（生产站点）
+#   cron-job.org 每 5 分钟 ping /api/ping 防止 Render 休眠
+# ============================================================
+
+services:
+  # ===== OpsPilot 主站点（Docker 部署） =====
+  - type: web
+    name: opspilot
+    runtime: docker
+    repo: https://github.com/YOUR_ORG/YOUR_REPO
+    branch: main
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/ping
+    autoDeploy: true
+
+    # 环境变量
+    envVars:
+      # Supabase（必须）
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # Next.js 公共 URL
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://opspilot.onrender.com
+
+      # Apprise 通知网关（可选，如需要通知功能则部署）
+      - key: APPRISE_BASE_URL
+        value: http://localhost:8001
+
+      # 加密密钥（用于 Infisical 凭据存储，不必须）
+      - key: ENCRYPTION_KEY
+        sync: false
+
+      # Vercel Webhook（不必须，仅用于自举 Vercel 部署监控）
+      - key: VERCEL_WEBHOOK_SECRET
+        sync: false
+      - key: SELF_DEPLOYMENT_PROJECT_ID
+        sync: false
+
+      # 自举标记（用于 /api/ping 返回部署标识）
+      - key: RENDER
+        value: "true"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+
+  # ===== Apprise 通知网关（可选，配套通知功能） =====
+  # 注意：免费版 Apprise 与其他服务共用免费时长
+  - type: web
+    name: opspilot-apprise
+    runtime: docker
+    repo: https://github.com/YOUR_ORG/YOUR_REPO
+    branch: main
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile.apprise
+    healthCheckPath: /status
+    autoDeploy: false
+
+    envVars:
+      - key: APPRISE_STATEFUL_MODE
+        value: simple
+      - key: APPRISE_WORKER_COUNT
+        value: "1"
+      - key: APPRISE_ADMIN
+        value: "y"
+      - key: TZ
+        value: Asia/Shanghai

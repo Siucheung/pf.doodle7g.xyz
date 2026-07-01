@@ -35,5 +35,6 @@ CREATE INDEX IF NOT EXISTS idx_infisical_credentials_project ON public.infisical
 CREATE INDEX IF NOT EXISTS idx_infisical_credentials_org ON public.infisical_credentials(organization_id);
 
 -- ===== Trigger: Auto-update updated_at =====
+DROP TRIGGER IF EXISTS set_updated_at ON public.infisical_credentials;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.infisical_credentials
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();

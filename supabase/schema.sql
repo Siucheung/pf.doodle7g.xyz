@@ -196,6 +196,20 @@ CREATE TABLE public.ci_pipelines (
   UNIQUE(project_id, pipeline_number)
 );
 
+-- ===== Notification Channels（通知渠道） =====
+-- 存储组织级的通知渠道配置，每个渠道由一个 Apprise URL 定义
+CREATE TABLE public.notification_channels (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  apprise_url TEXT NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT true,
+  notify_on TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- ===== Indexes =====
 CREATE INDEX idx_projects_org ON public.projects(organization_id);
 CREATE INDEX idx_deployments_project ON public.deployments(project_id);
@@ -210,6 +224,7 @@ CREATE INDEX idx_forge_repos_org ON public.forge_repos(organization_id);
 CREATE INDEX idx_ci_pipelines_project ON public.ci_pipelines(project_id);
 CREATE INDEX idx_ci_pipelines_org ON public.ci_pipelines(organization_id);
 CREATE INDEX idx_ci_pipelines_created ON public.ci_pipelines(created_at DESC);
+CREATE INDEX idx_notification_channels_org ON public.notification_channels(organization_id);
 
 -- ===== Triggers: Auto-update updated_at =====
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
@@ -233,6 +248,8 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.incidents
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.forge_repos
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.ci_pipelines
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.notification_channels
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();

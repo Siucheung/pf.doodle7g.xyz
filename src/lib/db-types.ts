@@ -137,6 +137,35 @@ export interface ForgeRepo {
   updated_at: string
 }
 
+export interface AlertmanagerAlert {
+  id: string
+  organization_id: string
+  fingerprint: string
+  status: string
+  labels: Record<string, string>
+  annotations: Record<string, string>
+  starts_at: string
+  ends_at: string | null
+  generator_url: string | null
+  severity: string
+  incident_id: string | null
+  created_at: string
+  updated_at: string
+  incident?: { title: string; status: string }
+}
+
+export interface NotificationChannel {
+  id: string
+  organization_id: string
+  name: string
+  type: string
+  apprise_url: string
+  enabled: boolean
+  notify_on: string[]
+  created_at: string
+  updated_at: string
+}
+
 export interface InfisicalCredential {
   id: string
   project_id: string

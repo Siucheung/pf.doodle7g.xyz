@@ -157,6 +157,15 @@ CREATE POLICY "admins_manage_ci_pipelines" ON public.ci_pipelines
 CREATE POLICY "admins_manage_webhooks" ON public.webhooks
   FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
 
+-- ===== Notification Channels =====
+ALTER TABLE public.notification_channels ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "members_read_notification_channels" ON public.notification_channels
+  FOR SELECT USING (organization_id IN (SELECT organization_id FROM public.user_orgs()));
+
+CREATE POLICY "admins_manage_notification_channels" ON public.notification_channels
+  FOR ALL USING (has_role(organization_id, ARRAY['owner','admin']::app_role[]));
+
 -- ===== Infisical 凭据 =====
 -- 此表存储加密密钥，仅允许服务端访问。
 -- RLS 阻止所有客户端查询；仅通过 SUPABASE_SERVICE_ROLE_KEY 绕过 RLS 访问。

@@ -79,8 +79,10 @@ export const SIDEBAR_ITEMS = [
   { titleKey: 'monitors', href: 'monitors', icon: 'Activity' },
   { titleKey: 'logs', href: 'logs', icon: 'ScrollText' },
   { titleKey: 'incidents', href: 'incidents', icon: 'AlertTriangle' },
+  { titleKey: 'alerts', href: 'alerts', icon: 'BellRing' },
   // 注意："密钥"是项目级页面（/{org}/projects/{project}/secrets），
   // 不属于组织级侧栏导航。通过项目详情页的 Tab 访问。
+  { titleKey: 'notifications', href: 'notifications', icon: 'Bell' },
   { titleKey: 'team', href: 'team', icon: 'Users' },
   { titleKey: 'settings', href: 'settings', icon: 'Settings' },
 ] as const
@@ -99,6 +101,36 @@ export const CI_PIPELINE_STATUSES = {
   error: 'Error',
   killed: 'Killed',
 } as const
+
+export const ALERTMANAGER_ALERT_STATUSES = {
+  firing: 'Firing',
+  resolved: 'Resolved',
+} as const
+
+export const NOTIFICATION_CHANNEL_TYPES: Record<string, string> = {
+  slack: 'Slack',
+  discord: 'Discord',
+  telegram: 'Telegram',
+  email: 'Email',
+  webhook: 'Webhook',
+  gotify: 'Gotify',
+  ntfy: 'ntfy',
+  pushover: 'Pushover',
+  custom: 'Custom',
+}
+
+export const NOTIFICATION_EVENTS = [
+  'incident.created',
+  'incident.updated',
+  'incident.resolved',
+  'deployment.started',
+  'deployment.success',
+  'deployment.failed',
+  'monitor.down',
+  'monitor.up',
+  'pipeline.success',
+  'pipeline.failure',
+] as const
 
 export const CI_PIPELINE_EVENTS = {
   push: 'Push',

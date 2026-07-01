@@ -1,0 +1,37 @@
+# ============================================================
+# Alertmanager 配置
+# 接收 Prometheus 告警，通过 webhook 转发到 OpsPilot
+# ============================================================
+# 使用方式：
+#   1. 在 docker-compose.yml 中启用此服务
+#   2. 在 .env 中设置 ALERTMANAGER_WEBHOOK_SECRET
+#   3. 在 OpsPilot 的通知页面配置告警通知渠道
+# ============================================================
+
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 10s
+  group_interval: 2m
+  repeat_interval: 4h
+  receiver: 'opspilot'
+
+receivers:
+  - name: 'opspilot'
+    webhook_configs:
+      # 告警通过 webhook 发送到 OpsPilot。
+      # OpsPilot 会自动创建/更新工单并触发通知。
+      # 将 {org} 替换为你的组织 slug。
+      - url: 'http://host.docker.internal:3000/api/webhooks/alertmanager?org={org}'
+        send_resolved: true
+        # 如需签名验证，取消以下注释并设置相同的 secret
+        # http_config:
+        #   headers:
+        #     X-Alertmanager-Signature: '{ALERTMANAGER_WEBHOOK_SECRET}'
+
+# 抑制规则：相同告警已触发了 critical 时，忽略 warning
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'job']

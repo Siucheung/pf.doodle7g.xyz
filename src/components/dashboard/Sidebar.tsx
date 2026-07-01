@@ -10,6 +10,8 @@ import {
   Activity,
   ScrollText,
   AlertTriangle,
+  BellRing,
+  Bell,
   Users,
   Settings,
   ChevronRight,
@@ -41,6 +43,8 @@ const iconMap: Record<string, React.ElementType> = {
   Activity,
   ScrollText,
   AlertTriangle,
+  BellRing,
+  Bell,
   Users,
   Settings,
 }

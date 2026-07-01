@@ -1,6 +1,6 @@
 # ============================================================
 # OpsPilot - 本地开发依赖服务
-# Gitea（代码托管 Forge）+ Woodpecker CI（持续集成）
+# Gitea（代码托管 Forge）+ Woodpecker CI（持续集成）+ Apprise（通知网关）
 # ============================================================
 # 使用方式：
 #   docker compose up -d
@@ -9,6 +9,7 @@
 # 服务访问：
 #   Gitea:     http://localhost:3001
 #   Woodpecker: http://localhost:8000
+#   Apprise:   http://localhost:8001
 # ============================================================
 
 services:
@@ -97,6 +98,51 @@ services:
     volumes:
       - dind-data:/var/lib/docker
 
+  # ===== Alertmanager（告警路由与静默管理） =====
+  # 接收 Prometheus 告警，通过 webhook 转发到 OpsPilot
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: opspilot-alertmanager
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+      - '--cluster.listen-address='
+    volumes:
+      - ./scripts/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    ports:
+      - "9093:9093"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9093/api/v2/status >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ===== Apprise（统一通知网关） =====
+  # 提供 REST API 发送通知到 130+ 服务（Slack、Telegram、Discord、邮件等）
+  # API 文档：https://github.com/caronc/apprise-api
+  apprise:
+    image: caronc/apprise:latest
+    container_name: opspilot-apprise
+    restart: unless-stopped
+    environment:
+      - APPRISE_STATEFUL_MODE=simple
+      - APPRISE_WORKER_COUNT=1
+      - APPRISE_ADMIN=y
+      - TZ=Asia/Shanghai
+    volumes:
+      - apprise-config:/config
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/status >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # ===== PostgreSQL（共享数据库：Gitea + Woodpecker） =====
   postgres:
     image: postgres:16-alpine
@@ -125,3 +171,5 @@ volumes:
   woodpecker-server-data:
   dind-data:
   ci-postgres-data:
+  apprise-config:
+  alertmanager-data:
