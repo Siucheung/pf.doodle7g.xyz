@@ -10,6 +10,13 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 
+// 常用按钮文案（跨命名空间，避免 getTranslations 命名空间限制）
+const COMMON_LABELS = {
+  cancel: '取消',
+  save: '保存',
+  delete: '删除',
+} as const
+
 export default async function NewIncidentPage({
   params,
 }: {
@@ -126,7 +133,7 @@ export default async function NewIncidentPage({
                   href={`/${org}/incidents`}
                   className="inline-flex items-center justify-center rounded-lg border border-input bg-background hover:bg-muted text-sm font-medium h-9 px-3 py-2"
                 >
-                  {t('common.cancel', { default: '取消' })}
+                  {COMMON_LABELS.cancel}
                 </Link>
                 <Button type="submit">
                   <Plus className="mr-2 h-4 w-4" />
