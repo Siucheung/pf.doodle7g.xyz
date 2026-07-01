@@ -32,17 +32,17 @@ export function IncidentStatusBadge({ status }: { status: string }) {
   )
 }
 
-export function EventTypeBadge({ eventType, t }: { eventType: string; t: (key: string) => string }) {
-  const labels: Record<string, string> = {
-    status_change: t('statusChanged'),
-    comment: t('comment'),
-    assignment: t('assignment'),
-    trigger: t('triggered'),
-  }
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  status_change: '状态已更改',
+  comment: '评论',
+  assignment: '分配',
+  trigger: '触发',
+}
 
+export function EventTypeBadge({ eventType, label }: { eventType: string; label?: string }) {
   return (
     <Badge variant="outline" className="text-xs">
-      {labels[eventType] || eventType}
+      {label || EVENT_TYPE_LABELS[eventType] || eventType}
     </Badge>
   )
 }

@@ -177,8 +177,8 @@
     "credentials": "Credentials"
   },
   "incidents": {
-    "title": "Incidents",
-    "description": "Track and manage incidents across your organization",
+    "title": "Title",
+    "description": "Description",
     "createIncident": "Create Incident",
     "activeIncidents": "Active Incidents",
     "resolved": "Resolved",
@@ -186,8 +186,6 @@
     "incidentsDesc": "All systems are running smoothly. Incidents will appear here when issues are detected.",
     "severity": "Severity",
     "status": "Status",
-    "title": "Title",
-    "description": "Description",
     "assignee": "Assignee",
     "timeline": "Timeline",
     "timelineDesc": "Event history for this incident",
@@ -200,12 +198,13 @@
     "info": "Info",
     "open": "Open",
     "acknowledged": "Acknowledged",
-    "resolved": "Resolved",
     "muted": "Muted",
     "statusChanged": "Status changed",
     "comment": "Comment",
     "assignment": "Assignment",
-    "triggered": "Triggered"
+    "triggered": "Triggered",
+    "project": "Project",
+    "createdAt": "Created"
   },
   "alerts": {
     "title": "Alerts",

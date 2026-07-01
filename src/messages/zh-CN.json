@@ -182,8 +182,8 @@
     "credentials": "凭据"
   },
   "incidents": {
-    "title": "工单",
-    "description": "跟踪和管理组织内的事件",
+    "title": "标题",
+    "description": "描述",
     "createIncident": "创建工单",
     "activeIncidents": "活跃工单",
     "resolved": "已解决",
@@ -191,8 +191,6 @@
     "incidentsDesc": "所有系统运行正常。检测到问题时，工单将显示在这里。",
     "severity": "严重程度",
     "status": "状态",
-    "title": "标题",
-    "description": "描述",
     "assignee": "负责人",
     "timeline": "时间线",
     "timelineDesc": "该工单的事件记录",
@@ -205,12 +203,13 @@
     "info": "信息",
     "open": "开启",
     "acknowledged": "已确认",
-    "resolved": "已解决",
     "muted": "已静音",
     "statusChanged": "状态已更改",
     "comment": "评论",
     "assignment": "分配",
-    "triggered": "触发"
+    "triggered": "触发",
+    "project": "项目",
+    "createdAt": "创建于"
   },
   "alerts": {
     "title": "告警",

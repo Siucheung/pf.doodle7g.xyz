@@ -59,6 +59,12 @@ export default async function IncidentDetailPage({
 
   const {incident, events} = data
   const t = await getTranslations('incidents')
+  const eventLabels: Record<string, string> = {
+    status_change: t('statusChanged'),
+    comment: t('comment'),
+    assignment: t('assignment'),
+    trigger: t('triggered'),
+  }
 
   return (
     <>
@@ -126,7 +132,7 @@ export default async function IncidentDetailPage({
                     </div>
                     <div className="pb-4 flex-1">
                       <div className="flex items-center gap-2">
-                        <EventTypeBadge eventType={event.event_type} t={t} />
+                        <EventTypeBadge eventType={event.event_type} label={eventLabels[event.event_type]} />
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(event.created_at), {addSuffix: true})}
                         </span>
