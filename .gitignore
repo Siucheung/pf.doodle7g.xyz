@@ -24,14 +24,10 @@ build/
 .DS_Store
 Thumbs.db
 
-# Logs
-logs
+# Logs (只匹配根目录下的 logs/ 目录，不匹配源代码路由)
+/logs
 *.log
 npm-debug.log*
-
-# Exception: 不忽略源代码中的 logs 路由
-!src/app/api/logs/**
-!src/app/(dashboard)/**/logs/**
 
 # Testing
 coverage/

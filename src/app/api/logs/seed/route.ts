@@ -183,9 +183,7 @@ function generateLogs(
     const actualLevel = isError ? 'error' : level
 
     logs.push({
-      project_id: projectIds.length > 0 && Math.random() > 0.3
-        ? randomItem(projectIds)
-        : null,
+      project_id: randomItem(projectIds),
       organization_id: orgId,
       level: actualLevel,
       message: fillTemplate(template),
@@ -239,10 +237,25 @@ export async function POST(request: Request) {
     }
 
     // 查找项目
-    const { data: projects } = await supabase
+    // 确保有项目可用（logs 表 project_id 有 NOT NULL 约束）
+    let { data: projects } = await supabase
       .from('projects')
       .select('id')
       .eq('organization_id', org.id)
+
+    if (!projects || projects.length === 0) {
+      const { data: newProject } = await supabase
+        .from('projects')
+        .insert({
+          organization_id: org.id,
+          name: 'Demo Project',
+          slug: 'demo-project',
+          description: '自动创建的演示项目',
+        })
+        .select('id')
+        .single()
+      if (newProject) projects = [newProject]
+    }
 
     const projectIds = (projects || []).map((p) => p.id)
 
