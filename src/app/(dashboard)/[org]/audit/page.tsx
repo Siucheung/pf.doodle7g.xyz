@@ -56,12 +56,12 @@ export default function AuditPage() {
       const res = await fetch(`/api/audit-log?${params}`)
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || '加载审计日志失败')
+        throw new Error(data.error || t('loadFailed'))
       }
       const data = await res.json()
       setLogs(data.logs || [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : '加载审计日志失败')
+      setError(err instanceof Error ? err.message : t('loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -145,7 +145,7 @@ export default function AuditPage() {
             <CardContent className="flex flex-col items-center justify-center py-16">
               <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
               <p className="text-destructive">{error}</p>
-              <Button variant="outline" className="mt-4" onClick={fetchLogs}>重试</Button>
+              <Button variant="outline" className="mt-4" onClick={fetchLogs}>{t('retry')}</Button>
             </CardContent>
           </Card>
         ) : filteredLogs.length === 0 ? (

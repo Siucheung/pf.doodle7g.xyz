@@ -123,7 +123,9 @@
     "branch": "分支",
     "commit": "提交",
     "by": "操作者",
-    "duration": "耗时"
+    "duration": "耗时",
+    "allDeployments": "查看组织内所有部署活动",
+    "projectDeployments": "此项目的部署"
   },
   "monitors": {
     "title": "监控",
@@ -144,7 +146,16 @@
     "responseTime": "响应时间",
     "uptime": "可用率",
     "noData": "暂无数据",
-    "lastChecks": "最近检查"
+    "lastChecks": "最近检查",
+    "createMonitor": "创建监控",
+    "monitorName": "监控名称",
+    "monitorUrl": "URL",
+    "monitorMethod": "请求方法",
+    "expectedStatusCode": "期望状态码",
+    "checkInterval": "检查间隔（秒）",
+    "selectProject": "选择项目（可选）",
+    "noProjects": "暂无项目",
+    "create": "创建"
   },
   "logs": {
     "title": "日志",
@@ -179,7 +190,9 @@
     "projects": "项目",
     "incidents": "工单",
     "notification_channels": "通知渠道",
-    "credentials": "凭据"
+    "credentials": "凭据",
+    "loadFailed": "加载审计日志失败",
+    "retry": "重试"
   },
   "incidents": {
     "title": "标题",
@@ -209,7 +222,11 @@
     "assignment": "分配",
     "triggered": "触发",
     "project": "项目",
-    "createdAt": "创建于"
+    "createdAt": "创建于",
+    "addComment": "添加评论",
+    "commentPlaceholder": "输入评论内容...",
+    "submitComment": "发表",
+    "operationFailed": "操作失败"
   },
   "alerts": {
     "title": "告警",
@@ -229,7 +246,9 @@
     "viewIncident": "查看工单",
     "filter": "筛选",
     "allStatuses": "全部状态",
-    "searchAlert": "搜索告警名称..."
+    "searchAlert": "搜索告警名称...",
+    "loadFailed": "加载告警失败",
+    "retry": "重试"
   },
   "secrets": {
     "title": "密钥",
@@ -275,7 +294,15 @@
     "saveSuccess": "通知渠道保存成功",
     "deleteConfirm": "确定要删除通知渠道「{name}」吗？",
     "deleteSuccess": "通知渠道已删除",
-    "fetchError": "加载通知渠道失败"
+    "fetchError": "加载通知渠道失败",
+    "saveFailed": "保存失败",
+    "deleteFailed": "删除失败",
+    "retry": "重试",
+    "disabled": "已停用",
+    "edit": "编辑",
+    "undoWarning": "此操作不可撤销。",
+    "cancel": "取消",
+    "delete": "删除"
   },
   "team": {
     "title": "团队",
@@ -346,7 +373,8 @@
     "now": "刚刚",
     "minutesAgo": "{count} 分钟前",
     "hoursAgo": "{count} 小时前",
-    "daysAgo": "{count} 天前"
+    "daysAgo": "{count} 天前",
+    "settings": "设置"
   },
   "status": {
     "pending": "等待中",
@@ -384,5 +412,23 @@
     "everyInterval": "每 {seconds} 秒 · 期望 {status}",
     "by": "操作者",
     "setupMonitors": "设置监控以跟踪端点健康状态"
+  },
+  "pipeline": {
+    "fetchLogsFailed": "获取日志失败",
+    "retry": "重试",
+    "loading": "加载日志",
+    "noLogs": "该步骤没有日志输出"
+  },
+  "events": {
+    "incident_created": "工单创建",
+    "incident_updated": "工单更新",
+    "incident_resolved": "工单解决",
+    "deployment_started": "部署开始",
+    "deployment_success": "部署成功",
+    "deployment_failed": "部署失败",
+    "monitor_down": "监控宕机",
+    "monitor_up": "监控恢复",
+    "pipeline_success": "流水线成功",
+    "pipeline_failure": "流水线失败"
   }
 }

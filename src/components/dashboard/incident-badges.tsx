@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge } from '@/components/ui/badge'
+import { useTranslations } from 'next-intl'
 import { INCIDENT_SEVERITIES, INCIDENT_STATUSES, INCIDENT_EVENT_TYPES } from '@/lib/constants'
 
 export function IncidentSeverityBadge({ severity }: { severity: string }) {
@@ -32,17 +33,18 @@ export function IncidentStatusBadge({ status }: { status: string }) {
   )
 }
 
-const EVENT_TYPE_LABELS: Record<string, string> = {
-  status_change: '状态已更改',
-  comment: '评论',
-  assignment: '分配',
-  trigger: '触发',
-}
-
 export function EventTypeBadge({ eventType, label }: { eventType: string; label?: string }) {
+  const t = useTranslations('incidents')
+  const fallbackLabels: Record<string, string> = {
+    status_change: t('statusChanged'),
+    comment: t('comment'),
+    assignment: t('assignment'),
+    trigger: t('triggered'),
+  }
+
   return (
     <Badge variant="outline" className="text-xs">
-      {label || EVENT_TYPE_LABELS[eventType] || eventType}
+      {label || fallbackLabels[eventType] || eventType}
     </Badge>
   )
 }

@@ -106,7 +106,13 @@
     "noLogsGenerated": "Logs will appear here when your project generates output",
     "noMonitorsDesc": "Set up monitors to track your endpoint health",
     "deployment": "Deployment",
-    "critical": "critical"
+    "critical": "critical",
+    "mustBeLoggedIn": "Please log in first",
+    "noDescription": "No description",
+    "noPermission": "You don't have permission to create projects",
+    "orgNotFound": "Organization not found",
+    "projectCreated": "Project created successfully!",
+    "unexpectedError": "An unexpected error occurred"
   },
   "deployments": {
     "title": "Deployments",
@@ -136,10 +142,20 @@
     "active": "Active",
     "paused": "Paused",
     "project": "Project",
-    "responseTime": "Response Time",
+    "responseTime": "Response time",
     "uptime": "Uptime",
     "noData": "No data",
-    "lastChecks": "Recent Checks"
+    "lastChecks": "Recent Checks",
+    "createMonitor": "Create Monitor",
+    "monitorName": "Monitor Name",
+    "monitorUrl": "URL",
+    "monitorMethod": "Method",
+    "expectedStatusCode": "Expected Status",
+    "checkInterval": "Interval (seconds)",
+    "selectProject": "Select Project (optional)",
+    "noProjects": "No projects",
+    "create": "Create",
+    "created": "Created"
   },
   "logs": {
     "title": "Logs",
@@ -174,7 +190,9 @@
     "projects": "Projects",
     "incidents": "Incidents",
     "notification_channels": "Notification Channels",
-    "credentials": "Credentials"
+    "credentials": "Credentials",
+    "loadFailed": "Failed to load audit logs",
+    "retry": "Retry"
   },
   "incidents": {
     "title": "Title",
@@ -204,7 +222,11 @@
     "assignment": "Assignment",
     "triggered": "Triggered",
     "project": "Project",
-    "createdAt": "Created"
+    "createdAt": "Created",
+    "addComment": "Add comment",
+    "commentPlaceholder": "Enter your comment...",
+    "submitComment": "Post",
+    "operationFailed": "Operation failed"
   },
   "alerts": {
     "title": "Alerts",
@@ -224,7 +246,9 @@
     "viewIncident": "View Incident",
     "filter": "Filter",
     "allStatuses": "All Statuses",
-    "searchAlert": "Search alert name..."
+    "searchAlert": "Search alert name...",
+    "loadFailed": "Failed to load alerts",
+    "retry": "Retry"
   },
   "secrets": {
     "title": "Secrets",
@@ -270,7 +294,15 @@
     "saveSuccess": "Notification channel saved successfully",
     "deleteConfirm": "Are you sure you want to delete channel \"{name}\"?",
     "deleteSuccess": "Notification channel deleted",
-    "fetchError": "Failed to load notification channels"
+    "fetchError": "Failed to load notification channels",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed",
+    "retry": "Retry",
+    "disabled": "Disabled",
+    "edit": "Edit",
+    "undoWarning": "This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
   },
   "team": {
     "title": "Team",
@@ -380,5 +412,23 @@
     "everyInterval": "Every {seconds}s · Expects {status}",
     "by": "by",
     "setupMonitors": "Set up monitors to track your endpoint health"
+  },
+  "pipeline": {
+    "fetchLogsFailed": "Failed to fetch logs",
+    "retry": "Retry",
+    "loading": "Loading logs",
+    "noLogs": "No log output for this step"
+  },
+  "events": {
+    "incident_created": "Incident created",
+    "incident_updated": "Incident updated",
+    "incident_resolved": "Incident resolved",
+    "deployment_started": "Deployment started",
+    "deployment_success": "Deployment succeeded",
+    "deployment_failed": "Deployment failed",
+    "monitor_down": "Monitor down",
+    "monitor_up": "Monitor recovered",
+    "pipeline_success": "Pipeline succeeded",
+    "pipeline_failure": "Pipeline failed"
   }
 }

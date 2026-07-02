@@ -10,6 +10,8 @@ import {formatDistanceToNow} from 'date-fns'
 import {getTranslations} from 'next-intl/server'
 import type {Monitor} from '@/lib/db-types'
 import {MonitorSparkline} from '@/components/dashboard/monitor-sparkline'
+import {cn} from '@/lib/utils'
+import {AddMonitorDialog} from '@/components/dashboard/add-monitor-dialog'
 
 async function getMonitors(orgId: string) {
   const supabase = await createClient()
@@ -59,10 +61,7 @@ export default async function MonitorsPage({
               {t('description')}
             </p>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('addMonitor')}
-          </Button>
+          <AddMonitorDialog orgId={orgData.id} />
         </div>
 
         {/* Gatus 基础设施健康看板入口 */}
@@ -164,8 +163,4 @@ export default async function MonitorsPage({
       </div>
     </>
   )
-}
-
-function cn(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(' ')
 }

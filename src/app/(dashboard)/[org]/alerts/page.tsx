@@ -53,12 +53,12 @@ export default function AlertsPage() {
       const res = await fetch(`/api/alerts?${params}`)
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || '加载告警失败')
+        throw new Error(data.error || t('loadFailed'))
       }
       const data = await res.json()
       setAlerts(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '加载告警失败')
+      setError(err instanceof Error ? err.message : t('loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -137,7 +137,7 @@ export default function AlertsPage() {
             <CardContent className="flex flex-col items-center justify-center py-16">
               <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
               <p className="text-destructive">{error}</p>
-              <Button variant="outline" className="mt-4" onClick={fetchAlerts}>重试</Button>
+              <Button variant="outline" className="mt-4" onClick={fetchAlerts}>{t('retry')}</Button>
             </CardContent>
           </Card>
         ) : filteredAlerts.length === 0 ? (

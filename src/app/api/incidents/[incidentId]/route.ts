@@ -59,7 +59,7 @@ export async function GET(
       .eq('incident_id', incidentId)
       .order('created_at', { ascending: false })
 
-    return NextResponse.json({ ...ctx.incident, events: events || [] })
+    return NextResponse.json({ ...(ctx.incident as Record<string, unknown>), events: events || [] })
   } catch (error) {
     console.error('[Incidents] GET 详情异常:', error)
     return NextResponse.json({ error: '服务器错误' }, { status: 500 })
@@ -98,7 +98,7 @@ export async function PATCH(
       previousStatus = ctx.incident.status
 
       // 校验状态转换
-      const allowed = ALLOWED_TRANSITIONS[previousStatus]
+      const allowed = previousStatus ? ALLOWED_TRANSITIONS[previousStatus] : undefined
       if (!allowed || !allowed.includes(body.status)) {
         return NextResponse.json(
           {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,7 @@ export function PipelineStepLogs({
   stepName,
   stepStatus,
 }: PipelineStepLogsProps) {
+  const t = useTranslations('pipeline')
   const [logs, setLogs] = useState<LogLine[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,14 +56,14 @@ export function PipelineStepLogs({
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || '获取日志失败')
+        throw new Error(data.error || t('fetchLogsFailed'))
       }
 
       const data = await res.json()
       setLogs(data.logs || [])
       setFetched(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '获取日志失败')
+      setError(err instanceof Error ? err.message : t('fetchLogsFailed'))
     } finally {
       setLoading(false)
     }
@@ -111,20 +113,20 @@ export function PipelineStepLogs({
             <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground">
               <XCircle className="h-5 w-5 text-destructive" />
               <p className="text-destructive">{error}</p>
-              <Button variant="outline" size="sm" onClick={fetchLogs}>
-                重试
-              </Button>
+<Button variant="outline" size="sm" onClick={fetchLogs}>
+                 {t('retry')}
+               </Button>
             </div>
           ) : logs.length === 0 && !fetched ? (
             <div className="flex items-center justify-center h-full">
               <Button variant="outline" size="sm" onClick={fetchLogs}>
                 <Terminal className="h-4 w-4 mr-2" />
-                加载日志
+                {t('loading')}
               </Button>
             </div>
           ) : logs.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
-              该步骤没有日志输出
+              {t('noLogs')}
             </div>
           ) : (
             <pre className="whitespace-pre-wrap break-all">

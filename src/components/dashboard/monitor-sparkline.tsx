@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { AreaChart, Area, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { Loader2 } from 'lucide-react'
 
@@ -19,6 +20,7 @@ interface MonitorSparklineProps {
 }
 
 export function MonitorSparkline({ monitorId }: MonitorSparklineProps) {
+  const t = useTranslations('monitors')
   const [data, setData] = useState<CheckData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -105,7 +107,7 @@ export function MonitorSparkline({ monitorId }: MonitorSparklineProps) {
               if (!d) return ''
               return new Date(d.checked_at).toLocaleTimeString()
             }}
-            formatter={(value: any) => [`${value || 0}ms`, '响应时间']}
+            formatter={(value: any) => [`${value || 0}ms`, t('responseTime')]}
           />
           <Area
             type="monotone"

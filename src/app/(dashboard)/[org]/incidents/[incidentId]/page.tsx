@@ -15,6 +15,7 @@ import {
   EventTypeBadge,
 } from '@/components/dashboard/incident-badges'
 import { IncidentActions } from '@/components/dashboard/incident-actions'
+import { CommentInput } from '@/components/dashboard/comment-input'
 
 async function getIncident(orgSlug: string, incidentId: string) {
   const supabase = await createClient()
@@ -154,6 +155,8 @@ export default async function IncidentDetailPage({
             )}
           </CardContent>
         </Card>
+
+        <CommentInput incidentId={incident.id} />
       </div>
     </>
   )

@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { IncidentStatusBadge } from '@/components/dashboard/incident-badges'
 
@@ -14,6 +15,7 @@ export function IncidentActions({
   org: string
   status: string
 }) {
+  const t = useTranslations('incidents')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -25,7 +27,7 @@ export function IncidentActions({
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({}))
-      alert(data.error || '操作失败')
+      alert(data.error || t('operationFailed'))
       return
     }
     startTransition(() => router.refresh())
@@ -35,12 +37,12 @@ export function IncidentActions({
     <div className="flex gap-2">
       {status === 'open' && (
         <Button onClick={() => patch('acknowledged')} disabled={isPending}>
-          确认
+          {t('acknowledge')}
         </Button>
       )}
       {status !== 'resolved' && status !== 'muted' && (
         <Button variant="outline" onClick={() => patch('resolved')} disabled={isPending}>
-          解决
+          {t('resolve')}
         </Button>
       )}
     </div>

@@ -35,7 +35,7 @@ export async function GET(
       .from('organization_members')
       .select('role')
       .eq('organization_id', project.organization_id)
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
       .single()
 
     if (!member || !['owner', 'admin', 'member'].includes(member.role)) {
@@ -97,7 +97,7 @@ export async function POST(
       .from('organization_members')
       .select('role')
       .eq('organization_id', project.organization_id)
-      .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
+      .eq('user_id', (await supabase.auth.getUser()).data.user?.id ?? '')
       .single()
 
     if (!member || !['owner', 'admin', 'member'].includes(member.role)) {

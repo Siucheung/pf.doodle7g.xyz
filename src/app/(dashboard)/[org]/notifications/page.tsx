@@ -179,7 +179,7 @@ export default function NotificationsPage() {
 
       const saved = await saveRes.json()
       if (!saveRes.ok) {
-        throw new Error(saved.error || '保存失败')
+        throw new Error(saved.error || t('saveFailed'))
       }
 
       const testRes = await fetch(`/api/notification-channels/${saved.id}/test`, {
@@ -230,7 +230,7 @@ export default function NotificationsPage() {
         method: 'DELETE',
       })
       if (!res.ok) {
-        throw new Error('删除失败')
+        throw new Error(t('deleteFailed'))
       }
       await fetchChannels()
     } catch (err) {
@@ -247,19 +247,8 @@ export default function NotificationsPage() {
   }
 
   const getEventLabel = (event: string) => {
-    const labels: Record<string, string> = {
-      'incident.created': '工单创建',
-      'incident.updated': '工单更新',
-      'incident.resolved': '工单解决',
-      'deployment.started': '部署开始',
-      'deployment.success': '部署成功',
-      'deployment.failed': '部署失败',
-      'monitor.down': '监控宕机',
-      'monitor.up': '监控恢复',
-      'pipeline.success': '流水线成功',
-      'pipeline.failure': '流水线失败',
-    }
-    return labels[event] || event
+    const key = 'events.' + event.replace('.', '_')
+    return t(key) || event
   }
 
   return (
@@ -414,9 +403,9 @@ export default function NotificationsPage() {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Info className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-destructive">{error}</p>
-              <Button variant="outline" className="mt-4" onClick={fetchChannels}>
-                重试
-              </Button>
+<Button variant="outline" className="mt-4" onClick={fetchChannels}>
+                 {t('retry')}
+               </Button>
             </CardContent>
           </Card>
         ) : channels.length === 0 ? (
@@ -454,7 +443,7 @@ export default function NotificationsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {!channel.enabled && (
-                        <Badge variant="secondary" className="text-xs">已停用</Badge>
+                        <Badge variant="secondary" className="text-xs">{t('disabled')}</Badge>
                       )}
                       <Button
                         variant="outline"
@@ -469,8 +458,8 @@ export default function NotificationsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => openEditDialog(channel)}
-                      >
-                        编辑
+                       >
+                         {t('edit')}
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger>
@@ -484,16 +473,16 @@ export default function NotificationsPage() {
                               {t('deleteConfirm', { name: channel.name })}
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              此操作不可撤销。
+                              {t('undoWarning')}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>取消</AlertDialogCancel>
+                            <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(channel.id)}
                               className="bg-destructive text-destructive-foreground"
                             >
-                              删除
+                               {t('delete')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
