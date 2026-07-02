@@ -155,7 +155,14 @@
     "checkInterval": "检查间隔（秒）",
     "selectProject": "选择项目（可选）",
     "noProjects": "暂无项目",
-    "create": "创建"
+    "create": "创建",
+    "editMonitor": "编辑监控",
+    "deleteMonitor": "删除监控",
+    "deleteConfirm": "确定要删除此监控吗？此操作不可撤销。",
+    "noChecks": "暂无检查记录",
+    "relatedIncidents": "关联工单",
+    "statusCode": "状态码",
+    "errorMessage": "错误信息"
   },
   "logs": {
     "title": "日志",
@@ -417,7 +424,12 @@
     "fetchLogsFailed": "获取日志失败",
     "retry": "重试",
     "loading": "加载日志",
-    "noLogs": "该步骤没有日志输出"
+    "noLogs": "该步骤没有日志输出",
+    "cancelPipeline": "取消流水线",
+    "restartPipeline": "重新运行",
+    "workflow": "工作流",
+    "stepName": "步骤",
+    "author": "作者"
   },
   "events": {
     "incident_created": "工单创建",

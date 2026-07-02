@@ -102,7 +102,7 @@ export default async function MonitorsPage({
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {monitors.map((monitor: Monitor) => (
+             {monitors.map((monitor: Monitor) => (
               <Card key={monitor.id} className="transition-colors hover:border-primary/50">
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -114,7 +114,9 @@ export default async function MonitorsPage({
                             monitor.enabled ? 'bg-green-500' : 'bg-gray-400'
                           )}
                         />
-                        {monitor.name}
+                        <Link href={`/${org}/monitors/${monitor.id}`} className="hover:underline">
+                          {monitor.name}
+                        </Link>
                       </CardTitle>
                       <CardDescription className="line-clamp-1">
                         {monitor.url}
